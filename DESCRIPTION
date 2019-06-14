@@ -1,0 +1,24 @@
+Package: transducer
+Type: Package
+Title: Reads RBR files
+Version: 0.0.1
+Authors@R: c(person("Jonathan", "Kennel", email = "jkennel@uoguelph.ca", role = c("aut", "cre", "trl")), 
+             person("Beth", "Parker", email = "bparker@uoguelph.ca", role = "ths"))
+Maintainer: Jonathan Kennel <jkennel@uoguelph.ca>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: GPL-3
+Depends:
+Imports:
+    data.table,
+    DBI,
+    RSQLite,
+    plotly,
+    viridis
+Encoding: UTF-8
+LazyData: true
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 6.1.1

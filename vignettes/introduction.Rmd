@@ -1,0 +1,210 @@
+---
+title: "Introduction"
+author: "Jonathan Kennel"
+date: "12/06/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(transducer)
+library(data.table)
+library(viridis)
+library(knitr)
+library(listviewer)
+
+```
+
+## Introduction
+
+This package aims to provide fast and efficient methods for handling RBR *.rsk 
+files.  These are SQLite3 databases and we do filtering in SQL to limit data 
+transfer to R.  For subsetted datasets we strive for instantaneous results. For
+repeated reads of large datasets it may be preferable to convert to a faster 
+read write file type.
+
+## Typical inputs
+
+In general, using flat files as the input will improve the utility of analysis.  In particular, two files will generally be of interest. At the moment the structure is fairly restricted, but will likely become more flexible with time.  The names of the columns are prescribed, however, the order doesn't matter.
+
+### File 1 (locations file)
+
+Columns (Required):
+
+- file: (character) the path with file name of the *.rsk files
+- elevation: (numeric) the deployed elevation of the transducer in (m)
+- is_baro: (TRUE/FALSE/NA) Whether the dataset is barometric pressure
+
+Columns (Common optional):
+
+- well: (character) name of the well
+- port: (character) the port
+- other: Any other information you want to include
+
+```{r file1read, echo = FALSE}
+
+locations <- fread('/media/kennel/Data/phd/personnel/pat/syngenta/transducer_depth_path.csv')
+locations[, file_name := tail(strsplit(path, '/')[[1]], 1), by = 1:nrow(locations)]
+locations <- locations[, list(file = path, well, port = id, elevation = (309.33 + 0.319)-depth, is_baro = baro)]
+#locations[, file := gsub('/media/kennel/Data/phd/personnel/pat/syngenta', '...', file)]
+```
+
+```{r file1}
+head(locations)
+```
+
+### File 2 (Manual measurement/Calibration file)
+
+Columns (Required):
+
+- start: The starting time for the subset (UTC)
+- end: The end time of the subset (UTC)
+- value_manual: (numeric) the manual measurement value
+
+
+```{r file2read, echo = FALSE}
+
+manual_wl <- data.table(start = as.POSIXct('2014-12-08 14:50:00', tz = 'UTC'),
+                        end   = as.POSIXct('2014-12-08 14:52:00', tz = 'UTC'),
+                        value_manual = c((309.33 + 0.319) - 17.45))
+
+```
+
+```{r file2}
+
+head(manual_wl)
+
+```
+
+## Reading files
+
+### Get start and end times
+
+```{r readstartend}
+
+head(rbr_start_end(locations))
+
+```
+
+
+We can use the locations file to read in data.  There is a lot of useful information in the .rsk file which is added to the location file information.  The result is stored in a nested data.table with the following columns:
+
+- file: (character) the full path to file
+- file_name: (character) the file_name without the path
+- channel: (character) the channel name from the database
+- data: (nested data.table) of (datetime, value) columns
+- calibration: (nested data.table) calibration values
+- type: (character) channel type
+- units: (character) the units
+- ruskin_version: (character) the version of ruskin that created the file
+- serial: (character) the rbr sensor serial number
+- model: (character) model of the rbr sensor
+- dt: (numeric) time interval in milliseconds
+
+
+Here we get hourly data from the dataset.
+
+```{r readsingledata}
+
+# Read data
+
+wl <- read_rbr(locations, 
+               start = as.POSIXct('2014-12-15', tz = 'UTC'), 
+               end = as.POSIXct('2015-04-01', tz = 'UTC'),
+               by = 900)
+
+jsonedit(wl)
+
+```
+
+If we want to pull out the data along with some other key columns we can unnest.  Because there is an elevation column in the location table we also get an estimated water level in meters.  The barometric values are also converted to an equivalent water height in meters.
+
+```{r data}
+
+wl[, data[[1]], by = list(well, port, serial)]
+
+
+wl[, calibration[[1]], by = list(well, port, serial)]
+
+```
+
+## Manual Measurement calibration
+
+
+```{r calib}
+
+# calculate the shifts
+shifts <- compare_manual(locations, manual_wl)
+
+# apply the shifts
+wl <- adjust_value(wl, shifts)
+
+```
+
+## Preview
+
+### Hydrograph
+
+```{r previewhydro}
+
+# Horizontal profile
+hydrograph(wl, var_type = 'pressure', plot_col = 'value_adj')
+  
+
+```
+
+
+### Vertical Profile
+
+#### With water level adjustment
+
+```{r previewvertical}
+
+# Vertical profile
+# We will read in a smaller subset
+# Generate weekly sequence of dates
+times <- seq.int(as.numeric(as.POSIXct('2014-12-15', tz = 'UTC')),
+                 as.numeric(as.POSIXct('2015-04-01', tz = 'UTC')),
+                 by = 86400*7)
+
+# read data
+wl <- read_rbr(locations, times = times)
+# apply shifts
+wl <- adjust_value(wl, shifts)
+# plot
+vertigraph(wl[!serial %in% c(78180, 78189)], 
+           var_type = 'pressure', plot_col = 'value_adj')
+
+
+```
+
+
+
+#### With baro adjustment
+
+
+```{r previewverticalbaro}
+
+air <- data.table(start = as.POSIXct('2014-12-08 00:02:00', tz = 'UTC'),
+                  end   = as.POSIXct('2014-12-08 00:05:00', tz = 'UTC'))
+
+shifts <- compare_air(locations, air)
+
+# apply shifts
+wl <- adjust_value(wl, shifts)
+# plot
+vertigraph(wl[!serial %in% c(78180, 78189)], 
+           var_type = 'pressure', 
+           plot_col = 'value_adj')
+```
+
+#### No adjustment
+```{r previewverticalnoadj}
+
+vertigraph(wl[!serial %in% c(78180, 78189)], 
+           var_type = 'pressure', plot_col = 'value_wl')
+
+
+```
+
