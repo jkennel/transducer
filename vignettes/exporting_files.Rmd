@@ -1,0 +1,48 @@
+---
+title: "Exporting files"
+author: "Jonathan Kennel"
+date: "28/06/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(transducer)
+library(data.table)
+```
+
+## Reading and exporting a folder of RBR files
+
+This is the general format to read a file in and export them to csv.
+
+```{r readwrite}
+# file that comes with the package
+f_name <- system.file("extdata", "example.rsk", package="transducer")
+
+dat <- read_rbr(f_name)                    # read data
+write_rbr(dat, tempdir())                  # write data to temporary folder
+write_rbr_info(dat, tempfile())            # write meta data to temporary file
+  
+```
+
+## Reading and exporting downsampled RBR files
+
+We can export 24 *.rsk files (each ~ 400 MB) containing one second data to hourly data in under 1 second.  Pressure and temperature will be output to separate files.
+
+```{r readwrite2}
+
+# location of *.rsk files
+f_name <- list.files('/media/kennel/Data/phd/personnel/pat/syngenta/', 
+                 pattern = '*.rsk',
+                 full.names = TRUE)
+print(f_name)
+
+dat <- read_rbr(f_name,
+           start = "2014-12-08", 
+           end   = "2015-04-13",
+           by    = 3600)                          # read data (hourly)
+write_rbr(dat, tempdir())                         # write data to temporary folder
+write_rbr_info(dat, tempfile())                   # write meta data to temporary file
+
+```
+

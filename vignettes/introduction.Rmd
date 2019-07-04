@@ -1,5 +1,5 @@
 ---
-title: "Introduction"
+title: "Data Structure"
 author: "Jonathan Kennel"
 date: "12/06/2019"
 output: html_document
@@ -16,64 +16,61 @@ library(listviewer)
 
 ```
 
-## Introduction
+## .rsk files
 
-This package aims to provide fast and efficient methods for handling RBR *.rsk 
-files.  These are SQLite3 databases and we do filtering in SQL to limit data 
-transfer to R.  For subsetted datasets we strive for instantaneous results. For
-repeated reads of large datasets it may be preferable to convert to a faster 
-read write file type.
+RBR stores data in .rsk files which are SQLite3 databases.  This file contains additional meta data that is often lost when storing data as a csv.
 
-## Typical inputs
+## Inputs
 
-In general, using flat files as the input will improve the utility of analysis.  In particular, two files will generally be of interest. At the moment the structure is fairly restricted, but will likely become more flexible with time.  The names of the columns are prescribed, however, the order doesn't matter.
+This packages requires the user to make two input files (.csv):
+- The location file which contains information on the transducer
+- The calibration file which contains start and end times for calibrations, and any manual measurement. 
+
+At the moment the structure is fairly restricted, but will likely become more flexible with time.  The names of the columns are prescribed, however, the order doesn't matter.
 
 ### File 1 (locations file)
 
-Columns (Required):
-
-- file: (character) the path with file name of the *.rsk files
-- elevation: (numeric) the deployed elevation of the transducer in (m)
-- is_baro: (TRUE/FALSE/NA) Whether the dataset is barometric pressure
-
-Columns (Common optional):
-
-- well: (character) name of the well
-- port: (character) the port
-- other: Any other information you want to include
-
 ```{r file1read, echo = FALSE}
 
-locations <- fread('/media/kennel/Data/phd/personnel/pat/syngenta/transducer_depth_path.csv')
-locations[, file_name := tail(strsplit(path, '/')[[1]], 1), by = 1:nrow(locations)]
-locations <- locations[, list(file = path, well, port = id, elevation = (309.33 + 0.319)-depth, is_baro = baro)]
-#locations[, file := gsub('/media/kennel/Data/phd/personnel/pat/syngenta', '...', file)]
+locs_details <- data.table(`Field name` = c('file', 'elevation', 'is_baro', 'well', 'port', 'other'),
+           Description = c('Path to file', 'Transducer elevation  (masl)', 'Is transducer in air?', 'The well name', 'Port id', 'Any other information'),
+           `Data type` = c('character', 'numeric', 'logical', 'character', 'character', 'any'),
+           Required = c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE))
+
+kable(locs_details)
 ```
 
-```{r file1}
-head(locations)
+```{r examplelocations, echo = FALSE}
+
+locations <- head(fread('/media/kennel/Data/phd/personnel/pat/syngenta/transducer_depth_path.csv'))
+locations[, file_name := tail(strsplit(path, '/')[[1]], 1), by = 1:nrow(locations)]
+loc_example <- locations[, list(file = file_name, well, port = id, elevation = (309.33 + 0.319)-depth, is_baro = baro)]
+locations <- locations[, list(file = path, well, port = id, elevation = (309.33 + 0.319)-depth, is_baro = baro)]
+
+kable(head(loc_example))
 ```
 
 ### File 2 (Manual measurement/Calibration file)
 
-Columns (Required):
-
-- start: The starting time for the subset (UTC)
-- end: The end time of the subset (UTC)
-- value_manual: (numeric) the manual measurement value
-
-
 ```{r file2read, echo = FALSE}
 
-manual_wl <- data.table(start = as.POSIXct('2014-12-08 14:50:00', tz = 'UTC'),
-                        end   = as.POSIXct('2014-12-08 14:52:00', tz = 'UTC'),
-                        value_manual = c((309.33 + 0.319) - 17.45))
+man_details <- data.table(`Field name` = c('start', 'end', 'value_manual'),
+           Description = c('Start (2014-12-08 14:50:00)', 'End (2014-12-08 14:55:00)', 'Manual water level elevation (masl)'),
+           `Data type` = c('character', 'character', 'numeric'),
+           Required = c(TRUE, TRUE, TRUE))
+
+kable(man_details)
 
 ```
 
 ```{r file2}
 
-head(manual_wl)
+manual_wl <- data.table(start = c(as.POSIXct('2014-12-08 14:50:00', tz = 'UTC'),
+                                  as.POSIXct('2014-12-08 14:52:00', tz = 'UTC')),
+                        end   = c(as.POSIXct('2014-12-08 14:52:00', tz = 'UTC'),
+                                  as.POSIXct('2014-12-08 14:54:00', tz = 'UTC')),
+                        value_manual = c((309.33 + 0.319) - 17.45))
+kable(manual_wl)
 
 ```
 
@@ -81,27 +78,14 @@ head(manual_wl)
 
 ### Get start and end times
 
-```{r readstartend}
+```{r readstartend, echo = TRUE}
 
-head(rbr_start_end(locations))
+rbr_start_end(locations)
 
 ```
 
 
 We can use the locations file to read in data.  There is a lot of useful information in the .rsk file which is added to the location file information.  The result is stored in a nested data.table with the following columns:
-
-- file: (character) the full path to file
-- file_name: (character) the file_name without the path
-- channel: (character) the channel name from the database
-- data: (nested data.table) of (datetime, value) columns
-- calibration: (nested data.table) calibration values
-- type: (character) channel type
-- units: (character) the units
-- ruskin_version: (character) the version of ruskin that created the file
-- serial: (character) the rbr sensor serial number
-- model: (character) model of the rbr sensor
-- dt: (numeric) time interval in milliseconds
-
 
 Here we get hourly data from the dataset.
 
@@ -110,35 +94,68 @@ Here we get hourly data from the dataset.
 # Read data
 
 wl <- read_rbr(locations, 
-               start = as.POSIXct('2014-12-15', tz = 'UTC'), 
-               end = as.POSIXct('2015-04-01', tz = 'UTC'),
-               by = 900)
+               start = as.POSIXct('2015-03-10 09:00:00', tz = 'UTC'), 
+               end = as.POSIXct('2015-03-10 16:00:00', tz = 'UTC'))
 
-jsonedit(wl)
+wl_example <- data.table(`Field name` = names(wl),
+           Description = c('The full path to file',
+                           'The file_name without the path',
+                           'Model of the rbr sensor',
+                           'Sensor serial number',
+                           'The well name',
+                           'The port name',
+                           'Is the transducer in air?',
+                           'The transducer sensor elevation',
+                           'The channel name from the database',
+                           'Channel type',
+                           'The version of ruskin that created the file',
+                           'Time interval in milliseconds',
+                           'Number of measurements',
+                           'Units of the measurement',
+                           'The id in the *.rsk file',
+                           'data.table with datetime and value',
+                           'data.table of calibration values'),
+           `Data type` = c('character', 'character', 'character',
+                           'character', 'character', 'character', 'logical', 
+                           'numeric', 'character','character','character',
+                           'integer','integer', 'character', 'integer',
+                           'data.table', 'data.table'))
+
+
+kable(wl_example)
 
 ```
 
-If we want to pull out the data along with some other key columns we can unnest.  Because there is an elevation column in the location table we also get an estimated water level in meters.  The barometric values are also converted to an equivalent water height in meters.
-
-```{r data}
-
-wl[, data[[1]], by = list(well, port, serial)]
-
-
-wl[, calibration[[1]], by = list(well, port, serial)]
-
-```
 
 ## Manual Measurement calibration
 
+The calibration file is used to get the differences between the measured transducer values and a water level measurement.  First we calculate the shift.
 
-```{r calib}
+
+```{r calcshifts}
 
 # calculate the shifts
 shifts <- compare_manual(locations, manual_wl)
 
+```
+
+Then we apply the shift to the dataset.
+
+```{r applyshift}
+
 # apply the shifts
 wl <- adjust_value(wl, shifts)
+
+```
+
+
+If we want to pull out the data along with some other key columns we can unnest.  Because there is an elevation column in the location table we also get an estimated water level in meters.  The barometric values are also converted to an equivalent water height in meters.
+
+
+```{r data}
+
+wl[, data[[1]], by = list(well, port, serial)]
+wl[, calibration[[1]], by = list(well, port, serial)]
 
 ```
 

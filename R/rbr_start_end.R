@@ -56,6 +56,7 @@ rbr_start_end.character <- function(x) {
 #'
 #' @examples
 rbr_start_end.data.table <- function(x) {
+
   rbr_start_end(x$file)
 
 }

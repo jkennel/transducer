@@ -53,10 +53,22 @@ read_rbr.character <- function(db_name,
 
   db_name <- db_name[file.exists(db_name)]
 
+  if(!is.null(start)) {
+    if (inherits(start, 'character')) {
+      as.POSIXct(start, tz = 'UTC')
+    }
+  }
+
+  if(!is.null(end)) {
+    if (inherits(end, 'character')) {
+      as.POSIXct(end, tz = 'UTC')
+    }
+  }
+
   # read data
   sql_suffix <- generate_sql_times(start, end, by, times)
 
-  rbindlist(
+  dat <- rbindlist(
     lapply(
       db_name,
       function(x) {
@@ -76,6 +88,8 @@ read_rbr.character <- function(db_name,
 
         dt <- read_rbr_db(db, x, sql_text)
 
+        if (!is.null(dt)) {
+
         RSQLite::dbDisconnect(db)
 
         # get file name without path
@@ -88,8 +102,11 @@ read_rbr.character <- function(db_name,
         dt <- dt[info, on = c('file', 'channel')]
 
         return(dt)
+        } else {
+          return(NULL)
+        }
       }))
-
+  dat[, n := vapply(data, nrow, FUN.VALUE = integer(1))]
 }
 
 
@@ -120,6 +137,12 @@ read_rbr.data.table <- function(locations,
                   by    = by,
                   times = times)
 
-  add_water_level(locations[dat, on = 'file'])
+  dat <- dat[n > 0]
 
+  dat <- add_water_level(locations[dat, on = 'file'])
+
+  setcolorder(dat, c("file", "file_name", "model", "serial",  "well", "port", "is_baro",  "elevation",
+                   "channel", "type", "ruskin_version", "dt", "n", "units","id", "data", "calibration"))
+
+  dat
 }

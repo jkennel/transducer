@@ -53,6 +53,7 @@ add_pore_pressure <- function(x, dbar_to_m = NULL) {
 add_water_level <- function(x, baro_serial = NULL, dbar_to_m = 1.019716) {
 
 
+
   # use the first barologger
   if(is.null(baro_serial)) {
     baro_serial = x[is_baro == TRUE]$serial[1]
