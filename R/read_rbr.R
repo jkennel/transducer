@@ -51,7 +51,16 @@ read_rbr.character <- function(db_name,
                                by    = NULL,
                                times = NULL) {
 
+
+
   db_name <- db_name[file.exists(db_name)]
+
+  # check file names
+  for(i in seq_along(db_name)) {
+    if (!file.exists(db_name[i])) {
+      stop(paste0(db_name[i], ' file does not exist'))
+    }
+  }
 
   if(!is.null(start)) {
     if (inherits(start, 'character')) {
@@ -140,8 +149,7 @@ read_rbr.data.table <- function(locations,
   dat <- dat[n > 0]
 
   dat <- add_water_level(locations[dat, on = 'file'])
-
-  setcolorder(dat, c("file", "file_name", "model", "serial",  "well", "port", "is_baro",  "elevation",
+  setcolorder(dat, c("file", "file_name", "model", "serial", "port", "is_baro",  "elevation",
                    "channel", "type", "ruskin_version", "dt", "n", "units","id", "data", "calibration"))
 
   dat

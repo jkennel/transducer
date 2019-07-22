@@ -32,7 +32,7 @@ rbr_start_end.character <- function(x) {
       db <- DBI::dbConnect(RSQLite::SQLite(), y)
 
       dt <- data.table(
-        file_name = y,
+        file = y,
         start = as.POSIXct(as.numeric(RSQLite::dbGetQuery(db, start_id)$tstamp)/1000,
                                     origin = '1970-01-01', tz = 'UTC'),
         end   = as.POSIXct(as.numeric(RSQLite::dbGetQuery(db, end_id)$tstamp)/1000,
@@ -57,6 +57,6 @@ rbr_start_end.character <- function(x) {
 #' @examples
 rbr_start_end.data.table <- function(x) {
 
-  rbr_start_end(x$file)
+  x[rbr_start_end(x$file), on = 'file']
 
 }

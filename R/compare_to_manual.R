@@ -13,15 +13,17 @@ compare_manual <- function(location,
                            manual_wl,
                            stat_fun = median) {
 
-  comp <- manual_wl[, estimate_wl(location, start, end, stat_fun),
-                    by = list(start, end, value_manual)]
+  man_wl <- location[manual_wl, on = 'well']
 
+  comp <- man_wl[, estimate_wl(.SD, start, end, stat_fun),
+                    by = list(start, end, well, value_manual)]
 
   comp[, shift := 0.0]
   comp <- comp[location, is_baro := i.is_baro, on = 'file']
   comp[is_baro == FALSE, shift := value_manual - value_est, on = 'file']
 
   comp
+
 
 }
 
@@ -39,9 +41,10 @@ compare_manual <- function(location,
 #' @examples
 compare_air <- function(location, manual_wl, stat_fun = median) {
 
+  man_wl <- location[manual_wl, on = 'well']
 
-  manual_wl[, estimate_air(location, start, end, stat_fun),
-            by = list(start, end)]
+  man_wl[, estimate_air(.SD, start, end, stat_fun),
+            by = list(start, end, well)]
 
 }
 
@@ -59,7 +62,6 @@ compare_air <- function(location, manual_wl, stat_fun = median) {
 estimate_air <- function(locations, start, end, stat_fun = median) {
 
   r <- read_rbr(locations$file, start, end)
-
   r[, value_air := as.numeric(lapply(data, function(x) stat_fun(x$value, na.rm = TRUE)))]
 
   r[, shift :=  stat_fun(value_air, na.rm = TRUE) - value_air]
@@ -84,7 +86,6 @@ estimate_wl <- function(locations, start, end, stat_fun = median) {
   r <- read_rbr(locations, start, end)
 
   r[, value_est := NA_real_]
-
   r[is_baro == FALSE, value_est := as.numeric(lapply(data, function(x) stat_fun(x$value_wl, na.rm = TRUE)))]
 
   return(r[, list(file, value_est)])
@@ -102,7 +103,7 @@ estimate_wl <- function(locations, start, end, stat_fun = median) {
 #' @examples
 adjust_value <- function(x, shift) {
 
-  x[shift, shift := i.shift, on = 'file']
+  x[shift, shift := i.shift, on = c('file', 'well')]
 
   x[, `:=` (data = lapply(data, adj_wl, adjust = shift)),
     by = seq_len(nrow(x))]

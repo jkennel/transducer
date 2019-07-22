@@ -35,7 +35,7 @@ At the moment the structure is fairly restricted, but will likely become more fl
 locs_details <- data.table(`Field name` = c('file', 'elevation', 'is_baro', 'well', 'port', 'other'),
            Description = c('Path to file', 'Transducer elevation  (masl)', 'Is transducer in air?', 'The well name', 'Port id', 'Any other information'),
            `Data type` = c('character', 'numeric', 'logical', 'character', 'character', 'any'),
-           Required = c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE))
+           Required = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE))
 
 kable(locs_details)
 ```
@@ -53,7 +53,6 @@ kable(head(loc_example))
 ### File 2 (Manual measurement/Calibration file)
 
 ```{r file2read, echo = FALSE}
-
 man_details <- data.table(`Field name` = c('start', 'end', 'value_manual'),
            Description = c('Start (2014-12-08 14:50:00)', 'End (2014-12-08 14:55:00)', 'Manual water level elevation (masl)'),
            `Data type` = c('character', 'character', 'numeric'),
@@ -69,8 +68,13 @@ manual_wl <- data.table(start = c(as.POSIXct('2014-12-08 14:50:00', tz = 'UTC'),
                                   as.POSIXct('2014-12-08 14:52:00', tz = 'UTC')),
                         end   = c(as.POSIXct('2014-12-08 14:52:00', tz = 'UTC'),
                                   as.POSIXct('2014-12-08 14:54:00', tz = 'UTC')),
-                        value_manual = c((309.33 + 0.319) - 17.45))
+                        well  = c('UW-1', 'UW-2'),
+                        value_manual = c((309.33 + 0.319) - 17.45) + c(0, 1000))
 kable(manual_wl)
+
+
+locations[6, well := 'UW-2']
+locations[1, well := 'UW-2']
 
 ```
 
@@ -87,9 +91,7 @@ rbr_start_end(locations)
 
 We can use the locations file to read in data.  There is a lot of useful information in the .rsk file which is added to the location file information.  The result is stored in a nested data.table with the following columns:
 
-Here we get hourly data from the dataset.
-
-```{r readsingledata}
+```{r readsingledata, echo = FALSE}
 
 # Read data
 
@@ -204,7 +206,8 @@ vertigraph(wl[!serial %in% c(78180, 78189)],
 ```{r previewverticalbaro}
 
 air <- data.table(start = as.POSIXct('2014-12-08 00:02:00', tz = 'UTC'),
-                  end   = as.POSIXct('2014-12-08 00:05:00', tz = 'UTC'))
+                  end   = as.POSIXct('2014-12-08 00:05:00', tz = 'UTC'),
+                  well  = c('UW-1', 'UW-2'))
 
 shifts <- compare_air(locations, air)
 
