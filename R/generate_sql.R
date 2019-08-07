@@ -132,6 +132,9 @@ generate_sql <- function(db, start = NULL, end = NULL, by = NULL) {
   # get column names
   col_names <- DBI::dbListFields(db, 'data')
 
+  # remove datasetID column if present
+  col_names <- col_names[!grepl('datasetID', col_names)]
+
   #nm <- c(paste0('`', col_names, '`'))
   sql_base <- paste0('SELECT ', paste(col_names, collapse = ', '),
                      ' FROM data')

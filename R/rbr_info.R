@@ -21,7 +21,11 @@ rbr_info <- function(db, db_name) {
   sql_text <- 'SELECT ruskinVersion AS ruskin FROM appSettings'
   version  <- setDT(RSQLite::dbGetQuery(db, sql_text))
 
-  if (version$ruskin > '2.0.0') {
+  sql_text <- 'SELECT * FROM instruments'
+  instru   <- setDT(RSQLite::dbGetQuery(db, sql_text))
+
+  # this check needs to be done more rigorously!!
+  if (version$ruskin > '2.0.0' | instru$firmwareVersion > '3.00') {
     sql_text <- 'SELECT calibrationID AS id, key, value FROM coefficients'
     coefficients <- setDT(RSQLite::dbGetQuery(db, sql_text))
     coefficients <- coefficients[, file := db_name]

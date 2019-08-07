@@ -46,6 +46,7 @@ read_rbr_db <- function(db, db_name, sql_text) {
     return(NULL)
   }
 
+
   data.table::setnames(dt, 'tstamp', 'datetime')
   dt[, datetime := as.POSIXct(datetime/1000,
                               origin = '1970-01-01',
