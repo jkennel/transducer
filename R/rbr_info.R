@@ -12,9 +12,6 @@
 #'
 #' @export
 #'
-#' @examples
-#' db_name <- system.file("extdata", "example.rsk", package="transducer")
-#' info <- rbr_info(db_name)
 #===============================================================================
 rbr_info <- function(db, db_name) {
 
@@ -22,14 +19,24 @@ rbr_info <- function(db, db_name) {
   version  <- setDT(RSQLite::dbGetQuery(db, sql_text))
 
 
-  #sql_text <- 'SELECT calibrationID AS id, key, value FROM coefficients'
+  # Check if coefficient table exists
+  nm_tbl <- RSQLite::dbListTables(db)
+  if ('coefficients' %in% nm_tbl) {
+    sql_text <- 'SELECT * FROM coefficients'
+    coefficients <- setDT(RSQLite::dbGetQuery(db, sql_text))
+    if('key' %in% names(coefficients)) {
+      use_coefficient_table <- TRUE
+    } else {
+      use_coefficient_table <- FALSE
+    }
+  } else {
+    use_coefficient_table <- FALSE
+  }
 
-  sql_text <- 'SELECT * FROM coefficients'
-  coefficients <- setDT(RSQLite::dbGetQuery(db, sql_text))
 
 
   # this check needs to be done more rigorously!!
-  if ('key' %in% names(coefficients)) {
+  if (use_coefficient_table) {
     coefficients <- coefficients[, list(id = calibrationID, key, value)]
     coefficients <- coefficients[, file := db_name]
     coefficients <- coefficients[, list(calibration = list(data.table(key, value))), by = list(file, id)]
