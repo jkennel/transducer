@@ -4,11 +4,12 @@
 \alias{add_water_level}
 \title{add_water_level}
 \usage{
-add_water_level(x, baro_serial = NULL, dbar_to_m = 1.019716)
+add_water_level(x, baro_serial = NULL, dbar_to_m = 1.019716, ...)
 }
 \arguments{
-\item{dbar_to_m}{}
+\item{...}{}
 }
 \description{
-add_water_level
+If baro_serial is not provided this function will try to use a baro logger in
+the provided dataset.
 }

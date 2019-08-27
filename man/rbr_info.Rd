@@ -17,10 +17,6 @@ list of results
 \description{
 get supplementary info from .rsk file
 }
-\examples{
-db_name <- system.file("extdata", "example.rsk", package="transducer")
-info <- rbr_info(db_name)
-}
 \author{
 Jonathan Kennel \email{jkennel@uoguelph.ca}
 }

@@ -5,7 +5,7 @@
 \title{read_rbr}
 \usage{
 \method{read_rbr}{data.table}(locations, start = NULL, end = NULL,
-  by = NULL, times = NULL)
+  by = NULL, times = NULL, ...)
 }
 \arguments{
 \item{locations}{file with port information}

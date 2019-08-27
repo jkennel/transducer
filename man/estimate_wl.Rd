@@ -4,7 +4,7 @@
 \alias{estimate_wl}
 \title{estimate_wl}
 \usage{
-estimate_wl(locations, start, end, stat_fun = median)
+estimate_wl(x, start, end, stat_fun = median)
 }
 \arguments{
 \item{end}{}
