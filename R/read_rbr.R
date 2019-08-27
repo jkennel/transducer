@@ -52,7 +52,6 @@ read_rbr.character <- function(db_name,
                                times = NULL) {
 
 
-
   db_name <- db_name[file.exists(db_name)]
 
   # check file names
@@ -115,7 +114,12 @@ read_rbr.character <- function(db_name,
           return(NULL)
         }
       }))
-  dat[, n := vapply(data, nrow, FUN.VALUE = integer(1))]
+
+  if(nrow(dat) > 0) {
+    dat[, n := vapply(data, nrow, FUN.VALUE = integer(1))]
+  }
+
+  return(dat)
 }
 
 
