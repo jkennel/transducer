@@ -3,6 +3,8 @@ Type: Package
 Title: Reads RBR files
 Version: 0.0.1
 Authors@R: c(person("Jonathan", "Kennel", email = "jkennel@uoguelph.ca", role = c("aut", "cre", "trl")), 
+             person("Sam", "Jacobson", email = "sam.jacobson@g360group.org", role = c("ctb")),
+             person("Kathleen", "Johnson", email = "kathleen.johnson@g360group.org", role = c("ctb")),
              person("Beth", "Parker", email = "bparker@uoguelph.ca", role = "ths"))
 Maintainer: Jonathan Kennel <jkennel@uoguelph.ca>
 Description: More about what it does (maybe more than one line)

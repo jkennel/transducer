@@ -13,16 +13,17 @@ compare_manual <- function(location,
                            manual_wl,
                            stat_fun = median) {
 
-  man_wl <- location[manual_wl, on = 'well']
+  man_wl <- location[manual_wl, on = 'well', nomatch = 0]
 
-  comp <- man_wl[, estimate_wl(.SD, start, end, stat_fun),
+  comp <- read_rbr(man_wl)
+  comp <- comp[, estimate_wl(.SD, start, end, stat_fun),
                     by = list(start, end, well, value_manual)]
 
   comp[, shift := 0.0]
   comp <- comp[location, is_baro := i.is_baro, on = 'file']
   comp[is_baro == FALSE, shift := value_manual - value_est, on = 'file']
 
-  comp
+  comp[!is.na(value_est)]
 
 
 }
@@ -81,14 +82,22 @@ estimate_air <- function(locations, start, end, stat_fun = median) {
 #' @export
 #'
 #' @examples
-estimate_wl <- function(locations, start, end, stat_fun = median) {
+estimate_wl <- function(x, start, end, stat_fun = median) {
 
-  r <- read_rbr(locations, start, end)
+  #r <- read_rbr(locations, start, end)
 
-  r[, value_est := NA_real_]
-  r[is_baro == FALSE, value_est := as.numeric(lapply(data, function(x) stat_fun(x$value_wl, na.rm = TRUE)))]
+  x <- copy(x)[, value_est := NA_real_]
 
-  return(r[, list(file, value_est)])
+  x[,
+    value_est := as.numeric(lapply(data, function(y) {
+      stat_fun(y$value_wl, na.rm = TRUE)
+      }))
+  ]
+
+  #x[is_baro == TRUE & type == 'pressure', value_est := 0.0]
+
+
+  return(x[, list(file, value_est)])
 
 }
 

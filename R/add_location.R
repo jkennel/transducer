@@ -42,26 +42,46 @@ add_pore_pressure <- function(x, dbar_to_m = NULL) {
 
 #' add_water_level
 #'
+#' If baro_serial is not provided this function will try to use a baro logger in
+#' the provided dataset.
+#'
+#'
 #' @param x
 #' @param baro_serial
 #' @param dbar_to_m
+#' @param ...
 #'
 #' @return
 #' @export
 #'
 #' @examples
-add_water_level <- function(x, baro_serial = NULL, dbar_to_m = 1.019716) {
+add_water_level <- function(x, baro_serial = NULL, dbar_to_m = 1.019716, ...) {
 
 
-
-  # use the first barologger
+  # check if baro serial number is provided
   if(is.null(baro_serial)) {
-    baro_serial = x[is_baro == TRUE]$serial[1]
+
+    # check if there are any baro file in dataset
+    if(any(x$is_baro)) {
+      baro <- x[is_baro == TRUE & type == 'pressure']
+    } else {
+      baro <- NA
+    }
+
+  } else {
+    baro <- x[serial == baro_serial & type == 'pressure']
   }
 
-  baro <- x[serial == baro_serial & units == 'dbar']$data[[1]]
+  n <- sum(x$type == 'pressure')
+
+  if(n == 0) {
+    warning('No pressure measurements in dataset.')
+    return(x)
+  }
 
   x[, `:=` (data = lapply(data, to_water_level,
+                          well = well,
+                          type = type,
                           baro = baro,
                           elevation = elevation,
                           units = units,
@@ -85,14 +105,51 @@ to_pore_pressure <- function(z, elevation, units, dbar_to_m = 1.019716) {
   return(z)
 }
 
-to_water_level <- function(z, baro, elevation, units, dbar_to_m = 1.019716, is_baro = FALSE) {
+to_water_level <- function(z,
+                           well,
+                           type,
+                           baro,
+                           elevation, units,
+                           dbar_to_m = 1.019716,
+                           is_baro = FALSE) {
+
+
+
+  if(type != 'pressure') {
+    z <- copy(z)[, value_wl := NA_real_]
+
+    return(z)
+  }
 
   if (is.na(is_baro)) {
     z <- copy(z)[, value_wl := value * dbar_to_m]
     return(z)
   }
+
   if (is_baro != FALSE) {
     z <- copy(z)[, value_wl := value * dbar_to_m]
+    return(z)
+  }
+
+  if(all(is.na(baro))) {
+    warning('No barometric pressure value was provided. Converting dbar to meters only')
+    if (units == 'dbar') {
+      z <- copy(z)[, value_wl := (value * dbar_to_m) + elevation]
+      return(z)
+    }
+  } else if (class(baro)[1] == "data.table") {
+    if(well %in% baro$well) {
+      baro <- rbindlist(baro[well == well]$data)
+    } else {
+      warning(paste0("Well name ",  well, " not found in barometric file. Using aggregated barometric record"))
+      baro <- rbindlist(baro$data)
+      baro <- baro[, list(value = mean(value, na.rm = TRUE)), by = list(datetime)]
+    }
+  }
+
+  if (length(intersect(baro$datetime, z$datetime)) == 0) {
+    warning('No barometric pressure datetimes match water level datetimes. Converting dbar to meters only')
+    z <- copy(z)[, value_wl := (value * dbar_to_m) + elevation]
     return(z)
   }
 

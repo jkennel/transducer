@@ -137,20 +137,22 @@ read_rbr.data.table <- function(locations,
                                 start = NULL,
                                 end   = NULL,
                                 by    = NULL,
-                                times = NULL) {
+                                times = NULL,
+                                ...) {
+  locs <- copy(locations)
+  locs[, file_id := 1:nrow(locs)]
 
+  dat <- locs[, read_rbr(file, start, end, by, times),
+            by = file_id]
 
-  dat <- read_rbr(locations$file,
-                  start = start,
-                  end   = end,
-                  by    = by,
-                  times = times)
+  nms <- c('file_id', setdiff(names(locs), names(dat)))
+  dat <- dat[locs[, nms, with = FALSE], on = 'file_id']
 
   dat <- dat[n > 0]
 
-  dat <- add_water_level(locations[dat, on = 'file'])
+  dat <- add_water_level(dat, ...)
   setcolorder(dat, c("file", "file_name", "model", "serial", "port", "is_baro",  "elevation",
-                   "channel", "type", "ruskin_version", "dt", "n", "units","id", "data", "calibration"))
+                   "channel", "type", "ruskin_version", "dt", "n", "units", "id", "data", "calibration"))
 
   dat
 }
