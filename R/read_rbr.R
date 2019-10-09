@@ -117,6 +117,8 @@ read_rbr.character <- function(db_name,
 
   if(nrow(dat) > 0) {
     dat[, n := vapply(data, nrow, FUN.VALUE = integer(1))]
+  } else {
+    warning(paste0(db_name, " does not have any values in the selected range"))
   }
 
   return(dat)
