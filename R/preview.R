@@ -63,9 +63,9 @@ hydrograph.data.table <- function(x,
                                plot_col = 'value',
                                max_n = 10000) {
 
+  x_long <-   unnest_data(x[is_baro == FALSE  & type == var_type], columns = 'serial')
+  y_long <-   unnest_data(x[is_baro == TRUE  & type == var_type], columns = 'serial')
 
-  x_long <- x[is_baro == FALSE  & type == var_type, data[[1]], by = serial]
-  y_long <- x[is_baro == TRUE & type == var_type, data[[1]], by = serial]
 
   p1 <- plotly::plot_ly(x_long,
                         x = ~datetime, y = ~get(plot_col),
@@ -153,7 +153,8 @@ vertigraph.data.table <- function(x,
                                   max_n = 10000) {
 
 
-  x_long <- x[is_baro == FALSE  & type == var_type, data[[1]], by = list(serial, elevation)]
+
+  x_long <- unnest_data(x[is_baro == FALSE  & type == var_type], columns = c('serial', 'elevation'))
 
   n <- length(unique(x_long$datetime))
 

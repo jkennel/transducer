@@ -156,8 +156,8 @@ If we want to pull out the data along with some other key columns we can unnest.
 
 ```{r data}
 
-wl[, data[[1]], by = list(well, port, serial)]
-wl[, calibration[[1]], by = list(well, port, serial)]
+wl[, (data[[1]]), by = list(well, port, serial)]
+wl[, (calibration[[1]]), by = list(well, port, serial)]
 
 ```
 
