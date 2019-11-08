@@ -63,13 +63,13 @@ read_rbr.character <- function(db_name,
 
   if(!is.null(start)) {
     if (inherits(start, 'character')) {
-      as.POSIXct(start, tz = 'UTC')
+      start <- as.POSIXct(start, tz = 'UTC')
     }
   }
 
   if(!is.null(end)) {
     if (inherits(end, 'character')) {
-      as.POSIXct(end, tz = 'UTC')
+      end <- as.POSIXct(end, tz = 'UTC')
     }
   }
 

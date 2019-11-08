@@ -27,7 +27,7 @@ write_rbr_info(dat, tempfile())            # write meta data to temporary file
 
 ## Reading and exporting downsampled RBR files
 
-We can export 24 *.rsk files (each ~ 400 MB) containing one second data to hourly data in under 1 second.  Pressure and temperature will be output to separate files.
+We can export 24 *.rsk files (each ~ 400 MB) containing one second data to hourly data.  Pressure and temperature will be output to separate files.
 
 ```{r readwrite2}
 
