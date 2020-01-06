@@ -15,6 +15,7 @@ Imports:
     data.table,
     RSQLite,
     viridis,
+    stringi,
     plotly,
     xlsx,
     DBI
