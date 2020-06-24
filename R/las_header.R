@@ -216,11 +216,11 @@ export_wcl <- function(fn, ...) {
   dat <- rbr_start_end(dat)
 
 
-  fn_vbs <- here('wellcad', gsub('.rsk', '.vbs', dat[1]$file_name))
-  fn_las <- here('wellcad', gsub('.rsk', '.las', dat[1]$file_name))
-  fn_ini <- here('wellcad', gsub('.rsk', '.ini', dat[1]$file_name))
-  fn_wcl <- here('wellcad', gsub('.rsk', '.WCL', dat[1]$file_name))
-  fn_zip <- here('wellcad', gsub('.rsk', '.zip', dat[1]$file_name))
+  fn_vbs <- here(gsub('.rsk', '.vbs', dat[1]$file_name))
+  fn_las <- here(gsub('.rsk', '.las', dat[1]$file_name))
+  fn_ini <- here(gsub('.rsk', '.ini', dat[1]$file_name))
+  fn_wcl <- here(gsub('.rsk', '.WCL', dat[1]$file_name))
+  fn_zip <- here(gsub('.rsk', '.zip', dat[1]$file_name))
 
   write_ini(fn_ini)
   write_las(dat, fn_las)
