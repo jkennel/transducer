@@ -6,7 +6,7 @@
 #' @export
 #'
 #' @examples
-las_header <- function(dat) {
+las_header <- function(dat, gravity = 9.80665, density = 0.9989) {
 
   n      <- nrow(dat)
   type   <- dat[1]$model
@@ -81,24 +81,24 @@ for (i in 1:n) {
     if(i == 1) {
 
     curve_information <- paste0(curve_information,
-'TEMPHR.M               :TEMPERATURE
+'TEMPHR.degC               :TEMPERATURE
 '
     )
     parameter_information <- paste0(parameter_information,
 'Temperature.  Temperature High Res   :Temperature
 ')
     column_names <- paste0(column_names,
-'     TEMPHR[M]')
+'     TEMPHR[degC]')
     } else {
       curve_information <- paste0(curve_information,
-'TEMPLR.M               :TEMPERATURE
+'TEMPLR.degC               :TEMPERATURE
 '
       )
       parameter_information <- paste0(parameter_information,
 'Temperature.  Temperature Low Res   :Temperature
 ')
       column_names <- paste0(column_names,
-'     TEMPLR[M]')
+'     TEMPLR[degC]')
     }
   }
 
@@ -114,11 +114,11 @@ for (i in 1:n) {
 
 
   other_information <-
-'#------------------------------------------------------------
+glue('#------------------------------------------------------------
 ~OTHER INFORMATION
-DENSITYWATER.      0.9989   :DENSITY OF WATER
-GRAVITY.           9.80665  :GRAVITY
-'
+DENSITYWATER.      ', density,'   :DENSITY OF WATER
+GRAVITY.           ', gravity,'  :GRAVITY
+')
 
 
   glue(basic_header,
@@ -140,10 +140,10 @@ GRAVITY.           9.80665  :GRAVITY
 #' @export
 #'
 #' @examples
-write_las <- function(dat, fn_las) {
+write_las <- function(dat, fn_las, gravity = 9.80665, density = 0.9989) {
 
   writeLines(las_header(dat), fn_las)
-
+  dat[type == 'pressure', data := lapply(data, function(x) x[, value := value * 10.0/(gravity * density)])]
   tmp <- dat[, (data[[1]]), by = list(id = paste(id, type, sep = '_'))]
   tmp[, value := round(value, 8)]
   setkey(tmp, id)
@@ -209,10 +209,13 @@ fn_ini
 #' @export
 #'
 #' @examples
-export_wcl <- function(fn, ...) {
+export_wcl <- function(fn,
+                       by = NULL,
+                       gravity = 9.80665,
+                       density = 0.9989) {
 
 
-  dat <- read_rbr(fn, ...)
+  dat <- read_rbr(fn, by = by)
   dat <- rbr_start_end(dat)
 
   fn_vbs <- here(gsub('.rsk', '.vbs', dat[1]$file_name))
@@ -222,7 +225,7 @@ export_wcl <- function(fn, ...) {
   fn_zip <- here(gsub('.rsk', '.zip', dat[1]$file_name))
 
   write_ini(fn_ini)
-  write_las(dat, fn_las)
+  write_las(dat, fn_las, gravity = gravity, density = density)
   write_vbs(fn_vbs, fn_las, fn_wcl, fn_ini)
 
   # free some room in RAM
