@@ -50,23 +50,23 @@ RSK.  ', fn, ':  RSK FILE
 '
 )
 
-
-for (i in 1:n) {
-
-  curve_information <-
+curve_information <-
 '#------------------------------------------------------------
 ~CURVE INFORMATION
 TIME.S                   :TIME
 '
 
-  parameter_information <-
+parameter_information <-
 '#------------------------------------------------------------
 ~PARAMETER INFORMATION
 Datetime.     Time in UTC :Plot Title
 '
-  column_names <-
+column_names <-
 '#------------------------------------------------------------
 ~A   TIME[S]'
+
+
+for (i in 1:n) {
 
   if(dat[i]$type == 'pressure') {
     curve_information <- paste0(curve_information,
@@ -214,7 +214,6 @@ export_wcl <- function(fn, ...) {
 
   dat <- read_rbr(fn, ...)
   dat <- rbr_start_end(dat)
-
 
   fn_vbs <- here(gsub('.rsk', '.vbs', dat[1]$file_name))
   fn_las <- here(gsub('.rsk', '.las', dat[1]$file_name))
