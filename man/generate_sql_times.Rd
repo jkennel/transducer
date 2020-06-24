@@ -4,11 +4,13 @@
 \alias{generate_sql_times}
 \title{generate_sql_times}
 \usage{
-generate_sql_times(start = NULL, end = NULL, by = NULL,
-  times = NULL)
+generate_sql_times(start = NULL, end = NULL, by = NULL, times = NULL)
 }
 \arguments{
 \item{times}{}
+}
+\value{
+
 }
 \description{
 generate_sql_times

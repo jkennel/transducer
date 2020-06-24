@@ -17,12 +17,14 @@ Imports:
     viridis,
     stringi,
     plotly,
-    xlsx,
-    DBI
+    DBI,
+    here,
+    glue
 Encoding: UTF-8
 LazyData: true
 Suggests:
     knitr,
-    rmarkdown
+    rmarkdown,
+    DT
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0

@@ -10,6 +10,9 @@ compare_air(location, manual_wl, stat_fun = median)
 \arguments{
 \item{stat_fun}{}
 }
+\value{
+
+}
 \description{
 compare_air
 This is for when all transducers should read the same value

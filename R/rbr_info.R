@@ -15,15 +15,39 @@
 #===============================================================================
 rbr_info <- function(db, db_name) {
 
-  sql_text <- 'SELECT ruskinVersion AS ruskin FROM appSettings'
-  version  <- setDT(RSQLite::dbGetQuery(db, sql_text))
-
-
   # Check if coefficient table exists
   nm_tbl <- RSQLite::dbListTables(db)
+
+  is_empty <- TRUE
+
+  if ('appSettings' %in% nm_tbl){
+    sql_text <- 'SELECT ruskinVersion AS ruskin FROM appSettings'
+    version  <- data.table::setDT(RSQLite::dbGetQuery(db, sql_text))
+    if(nrow(version) > 0) {
+      is_empty <- FALSE
+    }
+  }
+
+  if(!'appSettings' %in% nm_tbl | is_empty) {
+    return(data.table(file = db_name,
+                      id = NA_integer_,
+                      calibration = list(data.table(key1 = NA_character_,
+                                                    value = NA_real_)),
+                      channel = NA_character_,
+                      type = NA_character_,
+                      units = NA_character_,
+                      ruskin_version = NA_character_,
+                      serial = NA_integer_,
+                      model = NA_character_,
+                      dt = NA_integer_))
+
+  }
+
+
+
   if ('coefficients' %in% nm_tbl) {
     sql_text <- 'SELECT * FROM coefficients'
-    coefficients <- setDT(RSQLite::dbGetQuery(db, sql_text))
+    coefficients <- data.table::setDT(RSQLite::dbGetQuery(db, sql_text))
     if('key' %in% names(coefficients)) {
       use_coefficient_table <- TRUE
     } else {
@@ -37,18 +61,33 @@ rbr_info <- function(db, db_name) {
 
   # this check needs to be done more rigorously!!
   if (use_coefficient_table) {
-    coefficients <- coefficients[, list(id = calibrationID, key, value)]
+    coefficients <- coefficients[, list(id = calibrationID, key, value = as.numeric(value))]
     coefficients <- coefficients[, file := db_name]
     coefficients <- coefficients[, list(calibration = list(data.table(key, value))), by = list(file, id)]
 
-    sql_text <- 'SELECT samplingPeriod AS dt FROM continuous'
-    dt <- setDT(RSQLite::dbGetQuery(db, sql_text))
-    dt <- dt[, file := db_name]
+    if('continuous' %in% nm_tbl) {
+      sql_text <- 'SELECT continuousID AS id, samplingPeriod AS dt FROM continuous'
+      dt <- setDT(RSQLite::dbGetQuery(db, sql_text))
+      dt <- dt[, file := db_name]
+    } else if ('schedules' %in% nm_tbl){
+      sql_text <- 'SELECT scheduleID AS id, samplingPeriod AS dt FROM schedules'
+      dt <- setDT(RSQLite::dbGetQuery(db, sql_text))
+      dt <- dt[, file := db_name]
+    }
 
   } else {
 
     sql_text <- 'SELECT * FROM calibrations'
     coefficients <- setDT(RSQLite::dbReadTable(db, 'calibrations'))
+
+    # some calibration files don't have all the constants
+    # set missing values to NA
+    setnames(coefficients, names(coefficients), gsub('coef0','c', names(coefficients)))
+    coef_nms <- c('c0', 'c1', 'c2', 'c3', 'c4', 'c5',
+                  'c6', 'c7', 'c8', 'x0', 'x1', 'x2', 'x3', 'x4', 'x5', 'x6',
+                  'x7', 'n0', 'n1', 'n2', 'n3')
+    coef_nms <- setdiff(coef_nms, names(coefficients))
+    coefficients[, (coef_nms) := NA]
 
     coefficients <- coefficients[, list(calibrationID, c0, c1, c2, c3, c4, c5,
                                         c6, c7, c8, x0, x1, x2, x3, x4, x5, x6,
@@ -59,13 +98,14 @@ rbr_info <- function(db, db_name) {
       melt(coefficients,
          id.vars = 'calibrationID',
          variable.name = 'key',
-         value.name = 'value')
+         value.name = 'value',
+         variable.factor = FALSE)
     )
     setnames(coefficients, 'calibrationID', 'id')
     coefficients[, file := db_name]
     coefficients <- coefficients[, list(calibration = list(data.table(key, value))), by = list(file, id)]
 
-    sql_text <- 'SELECT samplingPeriod AS dt FROM schedules'
+    sql_text <- 'SELECT scheduleID AS id, samplingPeriod AS dt FROM schedules'
     dt <- setDT(RSQLite::dbGetQuery(db, sql_text))
     dt <- dt[, file := db_name]
   }
@@ -85,8 +125,9 @@ rbr_info <- function(db, db_name) {
   setkey(serial, file)
   setkey(channel, file, id)
   setkey(coefficients, file, id)
+  setkey(dt, file, id)
 
-
+  dt <- unique(dt[, list(file, dt)])
   coefficients[channel][serial, on = 'file'][dt, on = 'file']
 
 }

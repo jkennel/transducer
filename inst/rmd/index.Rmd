@@ -1,0 +1,324 @@
+--- 
+title: "RBR Datasets"
+author: "G360"
+date: "`r Sys.Date()`"
+knit: "bookdown::render_book"
+documentclass: krantz
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+colorlinks: yes
+lot: yes
+lof: yes
+fontsize: 12pt
+monofont: "Source Code Pro"
+monofontoptions: "Scale=0.7"
+site: bookdown::bookdown_site
+description: "This report provides information into all the RBR files collected for the G360 research group."
+params:
+  rbr_files: '/media/kennel/Seagate Expansion Drive/rbr_g360'
+  rds_file: NA
+---
+
+```{r setup, include=FALSE}
+print(getwd())
+knitr::opts_chunk$set(echo = FALSE)
+
+library(transducer)
+library(data.table)
+library(plotly)
+library(magrittr)
+library(DT)
+library(bookdown)
+library(htmlwidgets)
+library(knitr)
+library(widgetframe)
+library(viridis)
+# params <- list()
+# params$rbr_files <- '/media/kennel/Seagate Expansion Drive/rbr_g360'
+# params$rds_file <- '/media/kennel/Seagate Expansion Drive/rbr_g360meta'
+# tmp <- summarize_files(params$rbr_files)
+
+```
+
+```{r files, include=FALSE}
+
+if(!is.na(params$rds_file)) {
+  fn_rbr <- parse_paths(params$rds_file,
+                    full.names = TRUE,
+                    pattern = '*.rds')
+  rbr_old <- rbindlist(lapply(fn_rbr, readRDS))
+  
+  #rbr_old <- readRDS(params$rds_file)
+  
+  fn <- parse_paths(params$rbr_files,
+                    full.names = TRUE,
+                    pattern = '*.rsk')
+  fn <- fn[!fn %in% unique(rbr_old$file)]
+} else {
+  fn <- parse_paths(params$rbr_files, 
+                    full.names = TRUE,
+                    pattern = '*.rsk')
+}
+
+if(length(fn) > 0) {
+  
+  rbr_sum <- summarize_files(fn, 
+                             output_folder = '/media/kennel/Seagate Expansion Drive/rbr_g360meta/')
+  
+  
+  # x <- "/media/kennel/Seagate Expansion Drive/rbr_g360/077923_20180815_1838.rsk"
+  # 
+  # 
+  # a <- read_rbr(x)
+  # x <- "/media/kennel/Seagate Expansion Drive/rbr_g360//077923_20180620_1553.rsk"
+  
+  
+  
+  # fn <- list.files(params$folder, pattern = '*.rsk', full.names = TRUE)
+  # fs <- file.size(fn)
+  # wh <- which(fs > 300000)
+  # tmp <- rbr_start_end(fn[wh])
+  # 
+  # # 611, 1085
+  # for(i in 1087:nrow(tmp)) {
+  #   print(i)
+  #   print(tmp$file[i])
+  #   read_rbr(tmp$file[i], by = 3600)
+  # }
+  
+  rbr_sum <- rbr_start_end(rbr_sum)
+  
+  
+  rbr_sum[, max := vapply(data, function(x) max(x$max), FUN.VALUE=numeric(1))]
+  rbr_sum[, min := vapply(data, function(x) min(x$min), FUN.VALUE=numeric(1))]
+  
+  calibration <- rbr_sum[!is.na(type), (calibration[[1]]), 
+                         by = list(file_name, serial, 
+                                   start_date = as.Date(start), 
+                                   end_date = as.Date(end), type)]
+  
+  # rbr_sum[, str(calibration[1]), list(file_name, type)]
+  
+  if(!is.na(params$rds_file)) {
+    
+    rbr_old <- rbr_start_end(rbr_old)
+    
+    
+    rbr_old[, max := vapply(data, function(x) max(x$max), FUN.VALUE=numeric(1))]
+    rbr_old[, min := vapply(data, function(x) min(x$min), FUN.VALUE=numeric(1))]
+    
+  
+    rbr_sum <- rbind(rbr_old, rbr_sum)
+  } 
+
+  # saveRDS(rbr_sum, '/media/kennel/Seagate Expansion Drive/rbr_g360meta/rbr_sum.rds')
+  
+} else {
+  rbr_old <- rbr_start_end(rbr_old)
+  rbr_old[, max := vapply(data, function(x) max(x$max), FUN.VALUE=numeric(1))]
+  rbr_old[, min := vapply(data, function(x) min(x$min), FUN.VALUE=numeric(1))]
+  
+  rbr_sum <- rbr_old
+
+  calibration <- rbr_sum[!is.na(type), (calibration[[1]]), 
+                         by = list(file_name, serial, 
+                                   start_date = as.Date(start), 
+                                   end_date = as.Date(end), type)]
+}
+
+set.seed(123)
+
+rows_picked <- 1:nrow(rbr_sum) #sample(nrow(rbr_sum), size = 500, replace = FALSE)
+fns <- rbr_sum[rows_picked]$file
+rbr_sum <- rbr_sum[file %in% fns]
+setkey(rbr_sum, file_name)
+
+wh <- is.na(sapply(rbr_sum$data, function(x) x$datetime))
+
+
+rbr_table <- rbr_sum[!wh, list(serial,
+                               start_date = as.Date(start),
+                               end_date = as.Date(end),
+                               dt = dt,
+                               n, 
+                               # type,
+                               units,
+                               # min = round(min, 3),
+                               # max = round(max, 3),
+                               model,
+                               ruskin = ruskin_version,
+                               file_name)]
+
+rbr_missing <- rbr_sum[wh, list(serial,
+                                start_date = as.Date(start),
+                                end_date = as.Date(end),
+                                dt = dt,
+                                n, 
+                                # type,
+                                units,
+                                # min = round(min, 3),
+                                # max = round(max, 3),
+                                model,
+                                ruskin = ruskin_version,
+                                file_name)]
+
+```
+
+# Introduction
+
+This script reads rbr files in a folder and provides a summary of the datasets.  This is primarily an organization tool to see examine what files exist. How many, and the total size of data.
+
+
+RBR folder: `r params$rbr_files`
+
+
+## Temporal coverage
+
+```{r }
+
+coverage <- unique(rbr_table[, list(file_name, start_date, end_date)])
+coverage <- coverage[start_date > as.Date('2012-01-01')]
+start <- min(coverage$start_date, na.rm = TRUE)
+end   <- max(coverage$end_date, na.rm = TRUE)
+dates <- seq.Date(start, end, by = 1)
+
+setkey(coverage, start_date)
+
+nc <- length(dates)
+nr <- nrow(coverage)
+mat <- matrix(0.0, nrow = nr, ncol = nc)
+
+for(k in 1:nr) {
+  whh <- data.table::between(dates, coverage$start_date[k], coverage$end_date[k])
+  mat[k, ] <- as.numeric(whh)
+}
+
+ax <- list(
+  title = "",
+  showticklabels = FALSE)
+
+fig <- plot_ly(z = mat,
+               x = dates,
+               y = coverage$file_name,
+               colors = viridis(4)[1:2],
+               type = "heatmap", height = 700) %>%
+  hide_colorbar() %>% layout(yaxis = ax)
+fig
+```
+
+## File summary
+
+```{r }
+
+setkey(rbr_table, start_date, units, serial)
+
+DT::datatable(rbr_table, rownames = FALSE, filter = 'top', options = list(
+  scrollX = TRUE
+)) %>%
+  DT::formatStyle(columns = colnames(rbr_table), fontSize = '75%')
+
+```
+
+## Malformed and Unreadable files
+
+```{r }
+
+DT::datatable(rbr_missing, rownames = FALSE, filter = 'top')%>%
+  DT::formatStyle(columns = colnames(rbr_missing), fontSize = '75%')
+
+```
+
+
+
+# Data
+
+```{r rbrplot, echo = FALSE, results = 'asis', warning=FALSE}
+
+rbr_sum <- rbr_sum[!wh]
+fn <- unique(rbr_sum$file_name)
+# fn <- fn[1:10]
+for (i in seq_along(fn)) {
+  p <- list()
+  
+  rbr_sub <- rbr_sum[file_name == fn[i]]
+  # calibration_sub <- calibration[file_name == fn[i]]
+  
+  cat(paste0('## ', fn[i], ' {-}\n'))
+  
+  n <- nrow(rbr_sub)
+  for (j in 1:n) {
+    
+    data <- rbr_sub$data[[j]]
+    type <- rbr_sub$channel[j]
+    p[[j]] <- plot_ly(data, x = ~datetime, y = ~median,
+                      type = 'scatter', mode = 'lines', 
+                      name = 'median',
+                      line = list(color = 'rgb(22, 96, 167)', width = 1.5)) %>%
+      add_lines(x = ~datetime, y = ~max, name = 'max', 
+                line = list(color = 'rgb(167,	22,	96, alpha = 0.5)', width = 1.5)) %>%
+      add_lines(x = ~datetime, y = ~min, name = 'min', 
+                line = list(color = 'rgb(167,	22,	96, alpha = 0.5)', width = 1.5)) %>%
+      layout(showlegend = FALSE, yaxis = list(
+        title = paste0(rbr_sub$type[j], 
+                       ': ',
+                       rbr_sub$channel[j])))
+    
+  }
+  
+  s <- subplot(p, nrows = n, shareX = TRUE, titleY = TRUE)
+  
+  
+  fnn <- gsub('.rsk', '', fn[i])
+  htmlwidgets::saveWidget(frameableWidget(s),
+                          file = paste0(fnn, '.html'),
+                          selfcontained = FALSE,
+                          libdir = '_book/libs')
+
+  # replace _book/libs with libs
+  html_to_replace <- readLines(paste0(fnn, '.html'))
+  html_new <- gsub('_book/libs', 'libs', html_to_replace)
+  writeLines(html_new, paste0(fnn, '.html'))
+  
+  # insert iframe
+  cat(paste0('<iframe src="', fnn, '.html"
+        height="700" width="800" align="center"
+        scrolling="no" seamless="seamless"
+        frameBorder="0"></iframe>'))
+  
+  
+  cat('\n')
+  
+  
+}
+
+
+```
+
+# Calibration Info
+
+```{r }
+
+DT::datatable(calibration, rownames = FALSE, filter = 'top', options = list(
+  scrollX = TRUE
+)) %>%
+   DT::formatStyle(columns = colnames(calibration), fontSize = '80%')
+
+
+```
+
+
+# Footer
+
+Creation Date: `r Sys.time()`
+
+#### Session Info
+
+```{r sessioninfo}
+sessionInfo()
+
+
+
+  
+
+```

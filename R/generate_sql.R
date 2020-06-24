@@ -129,6 +129,12 @@
 #'
 generate_sql <- function(db, start = NULL, end = NULL, by = NULL) {
 
+
+  nm_tbl <- RSQLite::dbListTables(db)
+  if (!'data' %in% nm_tbl) {
+    return('')
+  }
+
   # get column names
   col_names <- DBI::dbListFields(db, 'data')
 

@@ -1,5 +1,7 @@
 
-#' hydrograph
+#' @title hydrograph
+#'
+#' create a hydrograph
 #'
 #' @param x
 #' @param ...
@@ -7,7 +9,6 @@
 #' @return
 #' @export
 #'
-#' @examples
 hydrograph <- function (x, ...) {
   UseMethod("hydrograph", x)
 }
@@ -46,7 +47,9 @@ hydrograph <- function (x, ...) {
 #'
 #' }
 
-#' hydrograph
+#' @title hydrograph
+#'
+#' create a hydrograph
 #'
 #' @param x
 #' @param var_type
@@ -57,7 +60,6 @@ hydrograph <- function (x, ...) {
 #' @return
 #' @export
 #'
-#' @examples
 hydrograph.data.table <- function(x,
                                var_type = 'pressure',
                                plot_col = 'value',
@@ -88,7 +90,9 @@ hydrograph.data.table <- function(x,
 
 
 
-#' vertigraph
+#' @title vertigraph
+#'
+#' Creates a vertical profile
 #'
 #' @param x
 #' @param ...
@@ -96,7 +100,6 @@ hydrograph.data.table <- function(x,
 #' @return
 #' @export
 #'
-#' @examples
 vertigraph <- function (x, ...) {
   UseMethod("vertigraph", x)
 }
@@ -135,7 +138,9 @@ vertigraph <- function (x, ...) {
 #'
 #' }
 
-#' vertigraph
+#' @title vertigraph
+#'
+#' Creates a vertical profile
 #'
 #' @param x
 #' @param var_type

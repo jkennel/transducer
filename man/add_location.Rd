@@ -11,6 +11,9 @@ add_location(x, locations, on_string = "serial")
 
 \item{locations}{data.table with file_name, in_water, and elevation}
 }
+\value{
+
+}
 \description{
 add_location
 }

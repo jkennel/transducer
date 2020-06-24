@@ -12,6 +12,9 @@ unnest_data(x, columns = c("serial", "type", "is_baro"))
 
 \item{columns}{the column names to include with the data}
 }
+\value{
+
+}
 \description{
 unnest_data
 This function pulls the data and auxilary columns out of a nested data.table

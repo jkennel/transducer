@@ -15,6 +15,9 @@ write_rbr(x, folder_path, datetime_format = "write.csv", ...)
 
 \item{...}{arguments to pass to fwrite}
 }
+\value{
+
+}
 \description{
 write_rbr
 }

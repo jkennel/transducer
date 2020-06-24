@@ -4,8 +4,7 @@
 \alias{read_rbr.character}
 \title{read_rbr}
 \usage{
-\method{read_rbr}{character}(db_name, start = NULL, end = NULL,
-  by = NULL, times = NULL)
+\method{read_rbr}{character}(db_name, start = NULL, end = NULL, by = NULL, times = NULL)
 }
 \arguments{
 \item{db_name}{character the path to the rbr database ( rsk )}

@@ -9,6 +9,9 @@ where_or_and(sql_text)
 \arguments{
 \item{sql_text}{sql text string}
 }
+\value{
+
+}
 \description{
 where_or_and
 }

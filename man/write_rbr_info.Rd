@@ -13,6 +13,9 @@ write_rbr_info(x, file_path, ...)
 
 \item{...}{}
 }
+\value{
+
+}
 \description{
 write_rbr_info
 }

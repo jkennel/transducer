@@ -9,6 +9,9 @@ estimate_air(locations, start, end, stat_fun = median)
 \arguments{
 \item{end}{}
 }
+\value{
+
+}
 \description{
 estimate_air
 }

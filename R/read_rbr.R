@@ -96,9 +96,9 @@ read_rbr.character <- function(db_name,
 
         dt <- read_rbr_db(db, x, sql_text)
 
-        if (!is.null(dt)) {
-
         RSQLite::dbDisconnect(db)
+
+        if (!is.null(dt)) {
 
         # get file name without path
         dt[, file_name := tail(strsplit(file, '/')[[1]], 1), by = 1:nrow(dt)]
@@ -120,6 +120,8 @@ read_rbr.character <- function(db_name,
   } else {
     warning(paste0(db_name, " does not have any values in the selected range"))
   }
+
+
 
   return(dat)
 }
