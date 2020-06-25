@@ -244,9 +244,9 @@ export_wcl <- function(fn,
 
   shell(
     shQuote(
-      suppressWarnings(normalizePath(fn_vbs)),
+      suppressWarnings(normalizePath(fn_vbs))),
     shell = 'cscript',
-    flag = '//nologo'))
+    flag = '//nologo')
 
   zip(zipfile = fn_zip,
       files = c(fn_vbs,
