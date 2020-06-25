@@ -12,8 +12,8 @@ las_header <- function(dat, gravity = 9.80665, density = 0.9989) {
   type   <- dat[1]$model
   serial <- dat[1]$serial
   dt     <- dat[1]$dt / 1000
-  strt   <- dat[1]$start
-  stop   <- dat[1]$end
+  strt   <- sprintf('%.1f', dat[1]$start)
+  stop   <- sprintf('%.1f', dat[1]$end)
   fn     <- dat[1]$file_name
   v      <- dat[1]$ruskin_version
   datet  <- as.character(Sys.Date())
@@ -30,9 +30,9 @@ WRAP.                NO  :ONE LINE PER DEPTH STEP
 glue(
 '#------------------------------------------------------------
 ~WELL INFORMATION
-STRT.S       ', strt,'  :FIRST INDEX VALUE
-STOP.S       ', stop,'  :LAST INDEX VALUE
-STEP.S               ', dt,'   :STEP
+STRT.S     ', strt,'  :FIRST INDEX VALUE
+STOP.S     ', stop,'  :LAST INDEX VALUE
+STEP.S                ', dt,'  :STEP
 NULL.           -999.99  :NULL VALUE
 COMP.              G360  :COMP
 WELL.             ', serial, '  :WELL
@@ -45,7 +45,7 @@ DATE.       ', datet ,'   :DATE
 API.                     :API
 RUSK.             ', v, '  :RUSKIN VERSION
 MODEL.          ', type    ,'  :MODEL
-RSK.  ', fn, ':  RSK FILE
+RSK.  ', fn, '  :RSK FILE
 
 '
 )
@@ -70,7 +70,7 @@ for (i in 1:n) {
 
   if(dat[i]$type == 'pressure') {
     curve_information <- paste0(curve_information,
-'PRES.M               :PRES
+'PRES.M                   :PRES
 ')
     parameter_information <- paste0(parameter_information,
 'Pressure.    Pressure   :Pressure
@@ -81,7 +81,7 @@ for (i in 1:n) {
     if(i == 1) {
 
     curve_information <- paste0(curve_information,
-'TEMPHR.degC               :TEMPERATURE
+'TEMPHR.degC              :TEMPERATURE
 '
     )
     parameter_information <- paste0(parameter_information,
@@ -91,7 +91,7 @@ for (i in 1:n) {
 '     TEMPHR[degC]')
     } else {
       curve_information <- paste0(curve_information,
-'TEMPLR.degC               :TEMPERATURE
+'TEMPLR.degC              :TEMPERATURE
 '
       )
       parameter_information <- paste0(parameter_information,
@@ -114,10 +114,12 @@ for (i in 1:n) {
 
 
   other_information <-
-glue('#------------------------------------------------------------
+glue(
+'#------------------------------------------------------------
 ~OTHER INFORMATION
 DENSITYWATER.      ', density,'   :DENSITY OF WATER
 GRAVITY.           ', gravity,'  :GRAVITY
+
 ')
 
 
@@ -131,7 +133,7 @@ GRAVITY.           ', gravity,'  :GRAVITY
 }
 
 
-#' Title
+#' write_las
 #'
 #' @param dat
 #' @param fn_las
@@ -143,6 +145,7 @@ GRAVITY.           ', gravity,'  :GRAVITY
 write_las <- function(dat, fn_las, gravity = 9.80665, density = 0.9989) {
 
   writeLines(las_header(dat, gravity = gravity, density = density), fn_las)
+  dat <- make_regular(dat)
   dat[type == 'pressure', data := lapply(data, function(x) x[, value := value * 10.0/(gravity * density)])]
   tmp <- dat[, (data[[1]]), by = list(id = paste(id, type, sep = '_'))]
   tmp[, value := round(value, 8)]
@@ -153,12 +156,13 @@ write_las <- function(dat, fn_las, gravity = 9.80665, density = 0.9989) {
   fwrite(tmp,
          file = fn_las,
          sep = ' ',
-         append = TRUE)
+         append = TRUE,
+         na = '-999.99')
 
 
 }
 
-#' Title
+#' write_vbs
 #'
 #' @param fn_vbs
 #' @param fn_las

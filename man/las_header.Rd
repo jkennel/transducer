@@ -4,7 +4,7 @@
 \alias{las_header}
 \title{Title}
 \usage{
-las_header(dat)
+las_header(dat, gravity = 9.80665, density = 0.9989)
 }
 \arguments{
 \item{dat}{}

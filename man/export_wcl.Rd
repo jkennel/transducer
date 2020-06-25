@@ -4,7 +4,7 @@
 \alias{export_wcl}
 \title{Title}
 \usage{
-export_wcl(fn, ...)
+export_wcl(fn, by = NULL, gravity = 9.80665, density = 0.9989)
 }
 \arguments{
 \item{...}{}
