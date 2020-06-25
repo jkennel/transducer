@@ -142,7 +142,7 @@ GRAVITY.           ', gravity,'  :GRAVITY
 #' @examples
 write_las <- function(dat, fn_las, gravity = 9.80665, density = 0.9989) {
 
-  writeLines(las_header(dat), fn_las)
+  writeLines(las_header(dat, gravity = gravity, density = density), fn_las)
   dat[type == 'pressure', data := lapply(data, function(x) x[, value := value * 10.0/(gravity * density)])]
   tmp <- dat[, (data[[1]]), by = list(id = paste(id, type, sep = '_'))]
   tmp[, value := round(value, 8)]
@@ -238,9 +238,11 @@ export_wcl <- function(fn,
     shell = 'cscript',
     flag = '//nologo')
 
-  zip(zipfile = fn_zip, files = c(fn_vbs,
-                                  fn_las,
-                                  fn_ini))
+  zip(zipfile = fn_zip,
+      files = c(fn_vbs,
+                fn_las,
+                fn_ini),
+      flags = '-j')
 
   unlink(fn_vbs)
   unlink(fn_ini)
