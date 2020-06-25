@@ -193,9 +193,6 @@ write_vbs <- function(fn_vbs, fn_las, fn_wcl, fn_ini, fn_wdt=NA) {
 
 }
 
-#obWCAD.ApplyTemplate "', normalizePath(fn_wdt, winslash = '\\'), '"
-
-# fn_wdt <- here('wellcad', 'Rbr Dply Indiv Press.wdt')
 
 write_ini <- function(fn_ini) {
 writeLines('[LASImport]
@@ -222,7 +219,8 @@ export_wcl <- function(fn,
 
 
   dat <- read_rbr(fn, by = by)
-  dat <- rbr_start_end(dat)
+  dat[, start := sapply(data, function(x) head(x, 1)$datetime)]
+  dat[, end   := sapply(data, function(x) tail(x, 1)$datetime)]
 
   fn_vbs <- here(gsub('.rsk', '.vbs', dat[1]$file_name))
   fn_las <- here(gsub('.rsk', '.las', dat[1]$file_name))
