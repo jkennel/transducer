@@ -178,7 +178,7 @@ write_las <- function(dat, fn_las, gravity = 9.80665, density = 0.9989) {
 #' @examples
 write_vbs <- function(fn_vbs, fn_las, fn_wcl, fn_ini, fn_wdt=NA) {
 
-  fn_wdt <- suppressWarnings(normalizePath((system.file("extdata",
+  fn_wdt <- suppressWarnings(normalizePath(system.file("extdata",
                                       "rbr_template_g360.wdt",
                                       package = "transducer"),
                           winslash = '\\'))
@@ -186,12 +186,12 @@ write_vbs <- function(fn_vbs, fn_las, fn_wcl, fn_ini, fn_wdt=NA) {
   writeLines(
   glue('Set obWCAD = CreateObject("WellCAD.Application")
   Set obBHole = obWCAD.FileImport ("',
-       suppressWarnings(normalizePath((fn_las, winslash = '\\')),
+       suppressWarnings(normalizePath(fn_las, winslash = '\\')),
   '", FALSE, "',
-  suppressWarnings(normalizePath((fn_ini, winslash = '\\')),'")
+  suppressWarnings(normalizePath(fn_ini, winslash = '\\')),'")
   obBHole.ApplyTemplate "', fn_wdt, '", FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE
   obBHole.SaveAs "',
-  suppressWarnings(normalizePath((fn_wcl, winslash = '\\')), '"
+  suppressWarnings(normalizePath(fn_wcl, winslash = '\\')), '"
   obWCAD.CloseBorehole FALSE, 0
   obWCAD.Quit FALSE'),
   fn_vbs
@@ -244,9 +244,9 @@ export_wcl <- function(fn,
 
   shell(
     shQuote(
-      suppressWarnings(normalizePath((fn_vbs))),
+      suppressWarnings(normalizePath(fn_vbs)),
     shell = 'cscript',
-    flag = '//nologo')
+    flag = '//nologo'))
 
   zip(zipfile = fn_zip,
       files = c(fn_vbs,
