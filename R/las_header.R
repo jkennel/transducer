@@ -145,9 +145,12 @@ GRAVITY.           ', gravity,'  :GRAVITY
 write_las <- function(dat, fn_las, gravity = 9.80665, density = 0.9989) {
 
   writeLines(las_header(dat, gravity = gravity, density = density), fn_las)
+
   dat <- make_regular(dat)
+
   dat[type == 'pressure', data := lapply(data, function(x) x[, value := value * 10.0/(gravity * density)])]
   tmp <- dat[, (data[[1]]), by = list(id = paste(id, type, sep = '_'))]
+  tmp[is.na(value), value := -999.99]
   tmp[, value := round(value, 8)]
   setkey(tmp, id)
   tmp <- dcast(tmp, datetime~id, value.var = 'value')
@@ -156,8 +159,7 @@ write_las <- function(dat, fn_las, gravity = 9.80665, density = 0.9989) {
   fwrite(tmp,
          file = fn_las,
          sep = ' ',
-         append = TRUE,
-         na = '-999.99')
+         append = TRUE)
 
 
 }
@@ -260,5 +262,23 @@ export_wcl <- function(fn,
 
 }
 
+
+# library(here)
+# library(glue)
+# library(transducer)
+# library(data.table)
+# fn <- '/media/kennel/Seagate Expansion Drive/rbr_ssfl/rd45b 081872_20191118_1154.rsk'
+# by <- 3600
+# dat <- read_rbr(fn, by = by)
+# dat[, start := sapply(data, function(x) head(x, 1)$datetime)]
+# dat[, end   := sapply(data, function(x) tail(x, 1)$datetime)]
+#
+# fn_vbs <- here(gsub('.rsk', '.vbs', dat[1]$file_name))
+# fn_las <- here(gsub('.rsk', '.las', dat[1]$file_name))
+# fn_ini <- here(gsub('.rsk', '.ini', dat[1]$file_name))
+# fn_wcl <- here(gsub('.rsk', '.WCL', dat[1]$file_name))
+# fn_zip <- here(gsub('.rsk', '.zip', dat[1]$file_name))
+#
+# write_las(dat, fn_las)
 
 
