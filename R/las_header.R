@@ -178,6 +178,7 @@ write_vbs <- function(fn_vbs, fn_las, fn_wcl, fn_ini, fn_wdt=NA) {
        normalizePath(fn_las, winslash = '\\'),
   '", FALSE, "',
   normalizePath(fn_ini, winslash = '\\'),'")
+  obBHole.ApplyTemplate "', system.file("extdata", "rbr_template_g360.wdt", package = "transducer"), '" FALSE
   obBHole.SaveAs "',
   normalizePath(fn_wcl, winslash = '\\'), '"
   obWCAD.CloseBorehole FALSE, 0
