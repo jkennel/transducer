@@ -87,7 +87,10 @@ rbr_info <- function(db, db_name) {
                   'c6', 'c7', 'c8', 'x0', 'x1', 'x2', 'x3', 'x4', 'x5', 'x6',
                   'x7', 'n0', 'n1', 'n2', 'n3')
     coef_nms <- setdiff(coef_nms, names(coefficients))
-    coefficients[, (coef_nms) := NA]
+
+    if(length(coef_nms) > 0) {
+      coefficients[, (coef_nms) := NA_real_]
+    }
 
     coefficients <- coefficients[, list(calibrationID, c0, c1, c2, c3, c4, c5,
                                         c6, c7, c8, x0, x1, x2, x3, x4, x5, x6,

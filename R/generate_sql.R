@@ -220,6 +220,8 @@ generate_sql_times <- function(start = NULL, end = NULL, by = NULL, times = NULL
     return(paste0(' WHERE tstamp IN (', paste(times*1000, collapse = ', '), ')'))
   }
 
+
+
   return("")
 }
 

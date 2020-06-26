@@ -76,6 +76,7 @@ read_rbr.character <- function(db_name,
   # read data
   sql_suffix <- generate_sql_times(start, end, by, times)
 
+
   dat <- rbindlist(
     lapply(
       db_name,
@@ -145,6 +146,7 @@ read_rbr.data.table <- function(locations,
                                 by    = NULL,
                                 times = NULL,
                                 ...) {
+
   locs <- copy(locations)
   locs[, file_id := 1:nrow(locs)]
 

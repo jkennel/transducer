@@ -62,7 +62,7 @@ kable(man_details)
 
 ```
 
-```{r file2}
+```{r file2, echo = FALSE}
 
 manual_wl <- data.table(start = c(as.POSIXct('2014-12-08 14:50:00', tz = 'UTC'),
                                   as.POSIXct('2014-12-08 14:52:00', tz = 'UTC')),
@@ -84,7 +84,7 @@ locations[1, well := 'UW-2']
 
 ```{r readstartend, echo = TRUE}
 
-rbr_start_end(locations)
+rbr_start_end(copy(locations))
 
 ```
 
@@ -97,14 +97,13 @@ We can use the locations file to read in data.  There is a lot of useful informa
 
 wl <- read_rbr(locations, 
                start = as.POSIXct('2015-03-10 09:00:00', tz = 'UTC'), 
-               end = as.POSIXct('2015-03-10 16:00:00', tz = 'UTC'))
+               end   = as.POSIXct('2015-03-10 16:00:00', tz = 'UTC'))
 
 wl_example <- data.table(`Field name` = names(wl),
            Description = c('The full path to file',
                            'The file_name without the path',
                            'Model of the rbr sensor',
                            'Sensor serial number',
-                           'The well name',
                            'The port name',
                            'Is the transducer in air?',
                            'The transducer sensor elevation',
@@ -116,12 +115,14 @@ wl_example <- data.table(`Field name` = names(wl),
                            'Units of the measurement',
                            'The id in the *.rsk file',
                            'data.table with datetime and value',
-                           'data.table of calibration values'),
+                           'data.table of calibration values',
+                           'other information: file_id',
+                           'other information: well name'),
            `Data type` = c('character', 'character', 'character',
-                           'character', 'character', 'character', 'logical', 
+                           'character', 'character', 'logical', 
                            'numeric', 'character','character','character',
                            'integer','integer', 'character', 'integer',
-                           'data.table', 'data.table'))
+                           'data.table', 'data.table','integer', 'character'))
 
 
 kable(wl_example)
