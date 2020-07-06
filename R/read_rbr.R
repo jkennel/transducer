@@ -1,4 +1,4 @@
-#' preview
+#' read_rbr
 #'
 #' @param x
 #' @param ...

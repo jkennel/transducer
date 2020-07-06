@@ -263,6 +263,29 @@ export_wcl <- function(fn,
 }
 
 
+# fn <- c('/media/kennel/Seagate Expansion Drive/rbr_ssfl/RD_38B_077615_20200603_1035.rsk',
+# '/media/kennel/Seagate Expansion Drive/rbr_ssfl/RD_147_124130_20200602_1307.rsk',
+# '/media/kennel/Seagate Expansion Drive/rbr_ssfl/RD35A_078062_20200601_1217.rsk')
+#
+
+#' write_rsk_summary
+#'
+#' @param fn
+#'
+#' @return
+#' @export
+#'
+#' @examples
+write_rsk_summary <- function(fn) {
+
+  s <- rbr_info(fn)
+  s <- rbr_start_end(s)
+
+  s <- unique(s[, list(model, serial, dt, start, end), by = file])
+  fwrite(s, 'file_summary.csv', dateTimeAs = "write.csv")
+
+}
+
 # library(here)
 # library(glue)
 # library(transducer)

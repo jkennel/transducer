@@ -2,7 +2,7 @@
 % Please edit documentation in R/las_header.R
 \name{write_vbs}
 \alias{write_vbs}
-\title{Title}
+\title{write_vbs}
 \usage{
 write_vbs(fn_vbs, fn_las, fn_wcl, fn_ini, fn_wdt = NA)
 }
@@ -13,5 +13,5 @@ write_vbs(fn_vbs, fn_las, fn_wcl, fn_ini, fn_wdt = NA)
 
 }
 \description{
-Title
+write_vbs
 }

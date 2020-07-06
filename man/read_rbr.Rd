@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_rbr.R
 \name{read_rbr}
 \alias{read_rbr}
-\title{preview}
+\title{read_rbr}
 \usage{
 read_rbr(x, ...)
 }
@@ -13,5 +13,5 @@ read_rbr(x, ...)
 
 }
 \description{
-preview
+read_rbr
 }

@@ -5,6 +5,8 @@
 #'
 #' @author Jonathan Kennel \email{jkennel@uoguelph.ca}
 #'
+#' @param x path to .rsk file
+#' @param ...
 #' @param db database connection
 #' @param db_name character the path to the rbr database ( rsk )
 #'
@@ -13,7 +15,61 @@
 #' @export
 #'
 #===============================================================================
-rbr_info <- function(db, db_name) {
+rbr_info <- function (x, ...) {
+  UseMethod("rbr_info", x)
+}
+
+
+#===============================================================================
+#' @title rbr_info
+#'
+#' @description get supplementary info from .rsk file
+#'
+#' @author Jonathan Kennel \email{jkennel@uoguelph.ca}
+#'
+#' @param x path(s) to .rsk file
+#'
+#' @return list of results
+#'
+#' @export
+#'
+#===============================================================================
+rbr_info.character <- function(x) {
+
+
+  info_dt <- lapply(x, function(db_name) {
+
+    db <- DBI::dbConnect(RSQLite::SQLite(), db_name)
+
+    info <- rbr_info(db, db_name)
+
+    RSQLite::dbDisconnect(db)
+
+    return(info)
+  })
+
+  rbindlist(info_dt)
+
+
+}
+
+
+#===============================================================================
+#' @title rbr_info
+#'
+#' @description get supplementary info from .rsk file
+#'
+#' @author Jonathan Kennel \email{jkennel@uoguelph.ca}
+#'
+#' @param db database connection
+#' @param db_name character the path to the rbr database ( rsk )
+#'
+#' @return list of results
+#'
+#' @export
+#'
+#===============================================================================
+rbr_info.SQLiteConnection <- function(db, db_name) {
 
   # Check if coefficient table exists
   nm_tbl <- RSQLite::dbListTables(db)
