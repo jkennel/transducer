@@ -70,25 +70,25 @@ for (i in 1:n) {
 
   if(dat[i]$type == 'pressure') {
     curve_information <- paste0(curve_information,
-'PRES.M                   :PRES
+'P-0.M                   :PRES
 ')
     parameter_information <- paste0(parameter_information,
 'Pressure.    Pressure   :Pressure
 ')
     column_names <- paste0(column_names,
-'     PRES[M]')
+'     P-0[M]')
   } else if (dat[i]$type == 'temperature') {
     if(i == 1) {
 
     curve_information <- paste0(curve_information,
-'TEMPHR.degC              :TEMPERATURE
+'T-0.degC              :TEMPERATURE
 '
     )
     parameter_information <- paste0(parameter_information,
 'Temperature.  Temperature High Res   :Temperature
 ')
     column_names <- paste0(column_names,
-'     TEMPHR[degC]')
+'     T-0[degC]')
     } else {
       curve_information <- paste0(curve_information,
 'TEMPLR.degC              :TEMPERATURE
