@@ -1,0 +1,333 @@
+---
+title: "Transducer Opinions"
+subtitle: ""
+author: "Jonathan Kennel"
+institute: ""
+date: "`r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: xaringan-themer.css
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+class: center, middle, inverse
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+
+library(transducer)
+library(data.table)
+library(waterlevel)
+library(aquifer)
+library(xaringanthemer)
+library(knitr)
+library(ggplot2)
+library(plotly)
+
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+style_mono_accent(
+  base_color = "#193f6e",
+  header_font_google = google_font("Merriweather"),
+  text_font_google   = google_font("Montserrat"),
+  code_font_google   = google_font("Fira Mono"),
+  base_font_size = "28px",
+  header_h1_font_size = "2.25rem",
+  header_h2_font_size = "2.00rem",
+  header_h3_font_size = "1.75rem",
+)
+```
+
+
+
+# Transducers are very precise
+
+---
+
+## Tip 1 - Raw files
+
+- Includes field notes and transducer data.
+- Store as read only.
+- Create a compressed back-up of the raw data.
+- Begin all analyses with these files if possible.
+- Simple folder structure.
+  - Separated by type.
+- Keep automated portion of the file name
+
+Example why this might be important:
+
+```{r breakdown, echo = FALSE}
+fn <- list.files('/media/jonathankennel/Seagate Expansion Drive/guelph_south', full.names = TRUE)
+print(table(tools::file_ext(fn)))
+```
+
+---
+
+```{r plotraw, echo = FALSE, fig.height = 9, fig.width = 12.5, device = 'png', dpi = 300}
+fn <- list.files('/media/jonathankennel/Seagate Expansion Drive/guelph_south', full.names = TRUE)
+fn <- fn[tools::file_ext(fn) == 'MON']
+
+dat <- read_transducer(fn, n_cores = 14)
+
+dat <- downsample_data(dat, 3600)
+
+dat <- subset_time_interval(dat, start = as.POSIXct('2020-03-26', tz = 'UTC'))
+
+dat <- trim_downloads(dat, n_vals = 2)
+
+dat <- combine_files(dat)
+
+
+plt <- dat[parameter != 'temperature']
+plt <- plt[, rbindlist(data), by = list(serial)]
+
+suppressWarnings({
+  p <- ggplot(plt, aes(x = datetime, y = value))
+  p <- p + geom_line()
+  p <- p + facet_wrap(serial~., scales = 'free_y')
+  p <- p + xlab("")
+  p <- p + ylab("Pressure")
+  p <- p + scale_x_datetime(expand = c(0,0))
+  p <- p + theme_bw()
+  print(p)
+})
+
+```
+
+---
+
+```{r plotraw2, echo = FALSE, fig.height = 9, fig.width = 12.5, device = 'png', dpi = 300}
+
+fn <- list.files('/media/jonathankennel/Seagate Expansion Drive/guelph_south', full.names = TRUE)
+fn <- fn[tools::file_ext(fn) == 'DAT']
+
+dat <- read_transducer(fn, n_cores = 14)
+
+dat <- downsample_data(dat, 3600)
+
+dat <- subset_time_interval(dat, start = as.POSIXct('2020-03-26', tz = 'UTC'))
+
+dat <- trim_downloads(dat, n_vals = 2)
+
+dat <- combine_files(dat)
+
+
+plt <- dat[parameter != 'temperature']
+plt <- plt[, rbindlist(data), by = list(serial)]
+
+suppressWarnings({
+  p <- ggplot(plt, aes(x = datetime, y = value))
+  p <- p + geom_line()
+  p <- p + facet_wrap(serial~., scales = 'free_y')
+  p <- p + xlab("")
+  p <- p + ylab("Pressure")
+  p <- p + scale_x_datetime(expand = c(0,0))
+  p <- p + theme_bw()
+  print(p)
+})
+
+```
+
+---
+
+```{r plottemp2, echo = FALSE, fig.height = 9, fig.width = 12.5, device = 'png', dpi = 300}
+
+plt <- dat[parameter == 'temperature']
+plt <- plt[, rbindlist(data), by = list(serial)]
+
+suppressWarnings({
+  p <- ggplot(plt, aes(x = datetime, y = value))
+  p <- p + geom_line()
+  p <- p + facet_wrap(serial~., scales = 'free_y')
+  p <- p + xlab("")
+  p <- p + scale_x_datetime(expand = c(0,0))
+  p <- p + ylab("Temperature")
+  p <- p + theme_bw()
+  print(p)
+})
+
+```
+
+---
+
+## Tip 2 - Exported data
+
+- Treat as disposable.
+- Try not to modify in point & click interface.
+  - Barometric correction/compensation.
+  - Conversions.
+- When modifying in a GUI document in a readme.
+- The process is an important part of the data
+
+
+---
+
+## Tip 3 - Field notes
+
+- Try to be precise with time (to the minute at least).
+- Field notes should be in a format that is archivable with a simple structure.
+  - Database table 
+  - .csv
+- Link to data files (file name, serial number, etc.)
+- Record time zone. 
+
+Example of field notes:
+
+
+---
+
+## Tip 4 - Time
+
+- Keep track of timezone information EST, EDT, PST, UTC etc.
+- Daylight savings will cause problems.
+- Understand how your software may modify time zone information.
+- Timezone information with dataset.
+- In general use regular time spacings
+- Start logging on even times (on the hour)
+
+
+---
+
+## Tip 5 - Calibration
+
+- When calibrating manually think of the range you will be exposing the transducers to.
+- Manual water levels are a guide - not always definitive.
+- Minimize 
+
+
+---
+
+## RBR
+
+```{r rbr, include = FALSE, echo = FALSE, fig.height = 9, fig.width = 12.5, device = 'png', dpi = 300}
+
+fn <- list.files('/media/jonathankennel/Seagate Expansion Drive/guelph_south', full.names = TRUE)
+fn <- fn[tools::file_ext(fn) == 'rsk'][1:4]
+
+dat <- read_transducer(fn)
+dat <- downsample_data(dat, 300)
+dat <- dat[, rbindlist(data), by = list(serial, channel, parameter)]
+setkey(dat, datetime, serial)
+
+
+p1 <- plot_ly(dat[parameter == 'pressure'], x = ~datetime, y = ~value, 
+        split = ~as.character(serial),
+        type = 'scatter', mode = 'lines',
+        legendgroup = 'g1')
+
+p2 <- plot_ly(dat[channel != 'pres21'], x = ~datetime, y = ~value, 
+        split = ~as.character(serial),
+        type = 'scatter', mode = 'lines',
+        legendgroup = 'g1',
+        showlegend = FALSE)
+
+subplot(p1, p2, nrows = 2, shareX = TRUE)
+
+```
+
+
+---
+
+## Micron
+
+- Requires calibration data.
+- xlsx output provides limited metadata.
+
+---
+```{r micron, echo = FALSE, fig.height = 9, fig.width = 12.5, device = 'png', dpi = 300}
+
+fn <- list.files('/media/jonathankennel/Seagate Expansion Drive/guelph_south', full.names = TRUE)
+fn <- fn[tools::file_ext(fn) == 'xlsx']
+
+cf <- '/home/jonathankennel/Storage/tmp/micron_calibration.csv'
+calibration <- micron_calibration(cf)
+
+dat <- read_transducer(x = fn, n_cores = 4, calibration=calibration)
+
+dat <- downsample_data(dat, 3600)
+dat <- subset_time_interval(dat, start = as.POSIXct('2020-07-20', tz = 'UTC'))
+
+dat <- trim_downloads(dat, n_vals = 10)
+
+dat <- dat[, rbindlist(data), by = serial]
+dat <- dat[serial != 'P86661']
+p <- ggplot(dat, aes(x = datetime, y = value))
+p <- p + geom_line()
+p <- p + scale_x_datetime(expand = c(0,0))
+p <- p + facet_wrap(serial~., scale = 'free_y')
+p <- p + theme_bw()
+suppressWarnings(print(p))
+
+```
+
+
+---
+
+## Westbay
+
+- No support is provided for the binary .wd2 files.
+- Output the files to a csv prior to import into R.
+- Can go directly to elevation from input file.
+
+---
+
+```{r westbay, echo = FALSE, fig.height = 9, fig.width = 12.5, device = 'png', dpi = 300}
+
+fn <- list.files('/media/jonathankennel/Seagate Expansion Drive/guelph_south', full.names = TRUE)
+fn <- fn[tools::file_ext(fn) == 'csv']
+y <- read_westbay(fn[1])
+
+# conversion because elevation is incorrect
+y[, well_elevation := well_elevation / 0.3048]
+
+y <- add_start_end_times(y)
+y <- westbay_make_regular(y)
+y <- westbay_to_elevation(y)
+y <- westbay_interpolate(y)
+
+aa <- unique(y[, (data[[1]]), by = file])
+
+setkey(aa, datetime)
+
+ggplot(aa, aes(y = wl_elevation, x = datetime)) +
+  geom_line() +
+  facet_wrap(port_elevation~., nrow = 5, scales = 'free_y') +
+  scale_x_datetime(expand = c(0,0)) + 
+  xlab('') + 
+  theme_bw()
+
+```
+
+---
+```{r westbay2, echo = FALSE, fig.height = 9, fig.width = 12.5, device = 'png', dpi = 300}
+
+ggplot(aa[as.numeric(datetime) %% 86400 == 0], 
+       aes(y = wl_elevation, 
+           x = port_elevation, 
+           color = datetime, 
+           group = datetime)) +
+  geom_line() +
+  geom_point() +
+  coord_flip() +
+  scale_color_viridis_c() +
+  theme_bw()
+
+```
+
+---
+
+
+
+## File types supported:
+
+- Diver __.mon__ (ascii), __.dat__ (binary)
+- Levelogger __.lev__ (ascii), __.xle__ (xml)
+- Micron with MadgeTech __.xlsx__ (Microsoft Excel)
+- RBR __.rsk__ (SQLite3 database)
+- Westbay __.csv__ (ascii)
+
+If you would like an additional file type supported please let me know.

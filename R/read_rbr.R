@@ -45,85 +45,90 @@ read_rbr <- function (x, ...) {
 #' db_name <- '/media/kennel/Data/tmp/rd10 077611_20181108_1037.rsk'
 #' system.time(wl <- read_rbr(db_name))
 #'
-read_rbr.character <- function(db_name,
+read_rbr.character <- function(x,
                                start = NULL,
                                end   = NULL,
                                by    = NULL,
-                               times = NULL) {
+                               times = NULL,
+                               transducer_depth = NULL,
+                               well_elevation   = NULL,
+                               ...) {
 
+  .check_files(x)
 
-  db_name <- db_name[file.exists(db_name)]
+  start <- .check_times(start)
+  end   <- .check_times(end)
 
-  # check file names
-  for(i in seq_along(db_name)) {
-    if (!file.exists(db_name[i])) {
-      stop(paste0(db_name[i], ' file does not exist'))
-    }
-  }
-
-  if(!is.null(start)) {
-    if (inherits(start, 'character')) {
-      start <- as.POSIXct(start, tz = 'UTC')
-    }
-  }
-
-  if(!is.null(end)) {
-    if (inherits(end, 'character')) {
-      end <- as.POSIXct(end, tz = 'UTC')
-    }
-  }
 
   # read data
   sql_suffix <- generate_sql_times(start, end, by, times)
+  db <- DBI::dbConnect(RSQLite::SQLite(), x)
 
 
-  dat <- rbindlist(
-    lapply(
-      db_name,
-      function(x) {
-        db <- DBI::dbConnect(RSQLite::SQLite(), x)
+  # get database info
+  info <- rbr_info(db, x)
 
-        # get database info
-        info <- rbr_info(db, x)
 
-        # ensure same values used for all subsets if times or start, end, by are
-        # provided
-        if(sql_suffix != '') {
-          sql_text <- paste0(generate_sql(db, start=NULL, end=NULL, by=NULL),
-                             sql_suffix)
-        } else {
-          sql_text <- generate_sql(db, start, end, by)
-        }
+  # ensure same values used for all subsets if times or start, end, by are
+  # provided
+  if(sql_suffix != '') {
+    sql_text <- paste0(generate_sql(db, start=NULL, end=NULL, by=NULL),
+                       sql_suffix)
+    dat <- read_rbr_db(db, x, sql_text)
+  } else {
+    sql_text <- generate_sql(db, start, end, by)
+    dat <- read_rbr_db(db, x, sql_text)
 
-        dt <- read_rbr_db(db, x, sql_text)
+    # raw_bin <- RSQLite::dbGetQuery(db, 'SELECT data FROM downloads')[[1]]
+    #
+    # dat <- data.table::data.table(file = x,
+    #                               channel = info$channel[1],
+    #                               data = list(read_rbr_bin(raw_bin, info$calibration[[1]]$value)))
 
-        RSQLite::dbDisconnect(db)
+  }
 
-        if (!is.null(dt)) {
 
-        # get file name without path
-        dt[, file_name := tail(strsplit(file, '/')[[1]], 1), by = 1:nrow(dt)]
+  RSQLite::dbDisconnect(db)
 
-        if (!is.null(by)) {
-          dt[, by := by]
-        }
 
-        dt <- dt[info, on = c('file', 'channel')]
+  if (!is.null(dat)) {
 
-        return(dt)
-        } else {
-          return(NULL)
-        }
-      }))
+    # get file name without path
+    # dat[, file_name := basename(file)]
+
+    if (!is.null(by)) {
+      dat[, by := by]
+    }
+
+    dat <- dat[info, on = c('file', 'channel')]
+
+    return(dat)
+  } else {
+    return(NULL)
+  }
+
+
 
   if(nrow(dat) > 0) {
     dat[, n := vapply(data, nrow, FUN.VALUE = integer(1))]
   } else {
-    warning(paste0(db_name, " does not have any values in the selected range"))
+    warning(paste0(x, " does not have any values in the selected range"))
+  }
+
+
+  if(!is.null(well_elevation)) {
+    dat[, well_elevation := well_elevation]
+  }
+
+  if(!is.null(transducer_depth)) {
+    dat[, transducer_depth := transducer_depth]
   }
 
   return(dat)
 }
+
+
+
 
 
 #' read_rbr
@@ -160,9 +165,13 @@ read_rbr.data.table <- function(locations,
 
   dat <- add_water_level(dat, ...)
   setcolorder(dat, c("file", "file_name", "model", "serial", "port", "is_baro",  "elevation",
-                   "channel", "type", "ruskin_version", "dt", "n", "units", "id", "data", "calibration"))
+                   "channel", "parameter", "version", "dt", "n", "units", "id", "data", "calibration"))
 
   dat
 }
 
-
+# system.time(a <-read_rbr('/home/jonathankennel/Storage/data/rbr/rd130 077623_20191119_1500.rsk'))
+# fn <- list.files('/home/jonathankennel/Downloads/', pattern = 'rsk', full.names = TRUE)
+#
+# b <- read_rbr(fn[6])
+# b

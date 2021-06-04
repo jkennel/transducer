@@ -1,0 +1,134 @@
+---
+title: "Organizing water level data"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(transducer)
+library(data.table)
+library(readxl)
+library(ggplot2)
+
+```
+
+
+
+
+
+## File types supported (alphabetical order):
+
+- Diver .mon (ascii), .dat (binary)
+- Levelogger .lev (ascii), .xle (xml)
+- Micron .xlsx (Microsoft Excel)
+- RBR .rsk (SQLite3 database)
+- Westbay .csv (ascii)
+
+If you would like an additional file type supported please let me know.
+
+
+
+## Diver
+
+```{r setup, include=FALSE}
+fn <- list.files('/media/jonathankennel/Seagate Expansion Drive/guelph_south', full.names = TRUE)
+table(tools::file_ext(fn))
+
+dat <- read_transducer(fn[tools::file_ext(fn) == 'MON'], n_cores = 14)
+
+dat <- downsample_data(dat, 3600)
+dat <- subset_time_interval(dat, start = as.POSIXct('2020-03-26', tz = 'UTC'))
+dat <- trim_downloads(dat, n_vals = 2)
+dat <- combine_files(dat)
+
+
+plt <- dat[parameter != 'temperature']
+plt <- plt[, rbindlist(data), by = list(serial)]
+
+p <- ggplot(plt, aes(x = datetime, y = value))
+p <- p + geom_line()
+p <- p + facet_wrap(serial~., scales = 'free_y')
+p <- p + theme_bw()
+p
+
+# fn <- list.files('/home/jonathankennel/Storage/data/diver/mon', full.names = TRUE)
+# dat <- read_transducer(fn, n_cores = 14)
+
+```
+
+
+
+## Levelogger
+
+```{r setup, include=FALSE}
+
+fn <- list.files('/home/jonathankennel/Storage/data/levelogger/lev', full.names = TRUE)
+dat <- read_transducer(fn)
+
+# need a faster xle parser
+fn <- list.files('/home/jonathankennel/Storage/data/levelogger/xle', full.names = TRUE)
+dat <- read_transducer(fn, n_cores = 14)
+
+```
+
+
+## Micron
+
+```{r setup, include=FALSE}
+
+fn <- list.files('/home/jonathankennel/Storage/data/micron/xlsx', full.names = TRUE)
+dat <- read_transducer(fn)
+
+```
+
+
+
+
+## Westbay
+
+Currently, no support is provided for the binary .wd2 files which requires the user to output the files to a csv prior to import into R.
+
+```{r setup, include=FALSE}
+
+fn <- list.files('/home/jonathankennel/Storage/data/westbay/mosdax', full.names = TRUE)
+
+dat <- read_transducer(fn, n_cores = 8)
+names(dat)
+
+```
+
+
+## RBR
+
+```{r setup, include=FALSE}
+
+
+fn <- list.files('/media/jonathankennel/Seagate Expansion Drive/rbr_ssfl', full.names = TRUE)[1:8]
+
+system.time(dat <- read_transducer(fn, n_cores = 8))
+
+
+```
+
+
+## Tips
+
+- Make the raw data read only.
+- Create a compressed back-up of the raw data.
+- Keep all raw downloads together but separated by type.  
+- Keep each raw data type separate (ie different folders for each)
+  - RBR
+  - Westbay
+  - Diver
+  - Other
+- Do not mix exported data with raw download data. The exported data should be treated as disposable.
+- Field notes should be in a format that is archivable with a simple structure.  The goal is to keep these files simple in structure.
+- Try to be precise with time.  To the minute at least.
+- Keep track of timezone information EST, EDT, PST, UTC etc. I prefer if everything is in UTC but often this is not possible. You may want to include this in the filename even.
+- May want to protect the Westbay box from the elements
+- Use automated naming of files.  You can add to it but do not change the autoname.
+- When working in a GUI try to keep track of what you have done.  Maybe have a separate readme file.
+- In general use regular time spacings
+- When calibrating thing of the range you will be exposing the transducers to.
+

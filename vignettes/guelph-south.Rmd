@@ -1,0 +1,197 @@
+---
+title: "Guelph-South Transducers"
+author: "G360 - Jonathan Kennel, Beth Parker"
+date: "2021-02-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(transducer)
+library(ggplot2)
+library(data.table)
+library(earthtide)
+library(waterlevel)
+library(knitr)
+library(xtable)
+library(patchwork)
+library(here)
+library(plotly)
+```
+
+
+## Read meta data
+
+
+```{r data}
+
+meta_path <- '/media/jonathankennel/Seagate Expansion Drive/guelph_south/meta/'
+w  <- unique(fread(file.path(meta_path, 'well_details.csv')))
+xd <- unique(fread(file.path(meta_path, 'transducer_details.csv')))
+ma <- unique(fread(file.path(meta_path, 'manual_wl.csv')))
+
+
+w_elev <- unique(w[, list(well, port, elevation)])
+
+xd <- w_elev[xd, on = c('well', 'port')]
+
+ma <- w[ma, on = c('well', 'port')]
+ma[, wl_elevation := elevation - value_manual]
+ma[, datetime := as.POSIXct(datetime, tz = 'UTC')]
+
+
+ggplot(ma[well == 'HBP-MPS4-20'], aes(x = datetime, y = wl_elevation, group = port, color = port)) + 
+  geom_point()
+```
+
+## Read Westbay
+
+
+```{r wb, echo=FALSE}
+
+fn <- list.files('/media/jonathankennel/Seagate Expansion Drive/guelph_south', full.names = TRUE)
+fn <- fn[tools::file_ext(fn) == 'csv']
+wb  <- read_transducer(fn)
+wb
+
+```
+
+
+
+## Read Diver (MON)
+
+```{r pressure, echo=FALSE}
+
+
+# fn <- c('hbp-mps2-19 baro_200401123850_V9549.DAT', 'hbp-mps2-19 port 1_200401230820_X0311.MON')
+# fn <- file.path('/media/jonathankennel/Seagate Expansion Drive/guelph_south/', fn)
+# tmp <- read_transducer(fn)
+# tmp[parameter == 'pressure', parameter := 'level']
+# tmp <- tmp[parameter == 'level']
+# 
+# a <- tmp[, rbindlist(data), by = list(name = basename(file))]
+# b <- dcast(a, datetime~name, value.var = 'value')
+# setnames(b, c('datetime', 'baro', 'wl'))
+# b[, wl := shift(wl *100, 60*5)]
+# b[, elev := wl - baro]
+# plot(baro~datetime, b[-c(1:500, .N:(.N-500))], type='l')
+# par(new = TRUE)
+# plot(wl~datetime, b[-c(1:500, .N:(.N-500))], type='l', col = 'blue')
+# par(new = TRUE)
+# plot(elev~datetime, b[-c(1:500, .N:(.N-500))], type='l', col = 'green')
+# 
+# 
+# plot(elev~datetime, b[-c(1:10, .N:(.N-500))], type='l')
+# plot(wl~datetime, b, type='l')
+# ggplot(a, aes(x = datetime, y = value, group = name, color = name)) +
+#   geom_line()
+
+
+
+
+fn <- list.files('/media/jonathankennel/Seagate Expansion Drive/guelph_south', full.names = TRUE)
+fn <- fn[tools::file_ext(fn) == 'DAT']
+dv  <- read_transducer(fn)
+fn <- list.files('/media/jonathankennel/Seagate Expansion Drive/guelph_south', full.names = TRUE)
+nm <- xd[tools::file_ext(xd$path) == 'MON']$path
+mf <- fn[basename(fn) %in% nm]
+add  <- read_transducer(mf)
+add[parameter %chin% c('water_head_toc_cl', 'pressure'), channel := 'level']
+add[parameter %chin% c('water_head_toc_cl', 'pressure'), parameter := 'level']
+add[parameter %chin% c('level'), units := 'cmh2o']
+add$data <- lapply(add$data, function(x) {
+  x$value <- x$value * 100
+  x$datetime <- x$datetime +3600*5
+  x
+  })
+class(dv[[1]]) <- 'character'
+dv <- rbind(dv, add)
+
+
+# dv <- xd[path %in% basename(fn)]
+dv[, path := basename(file)]
+dv <- dv[xd[, list(path, well, transducer_depth = depth, port, well_elevation = elevation, isbaro, timezone)], on = 'path', nomatch = 0]
+
+
+dv <- dv[parameter == 'level']
+
+dv <- dv[well == 'HBP-MPS4-20']
+
+
+dv$data <- lapply(dv$data, function(x) {
+  x$value <- x$value / 100
+  x
+  })
+
+dv <- dv[, data := .(.(make_even_times(data[[1]], diff_time = dt))), by = 1:nrow(dv)]
+
+dv <- westbay_to_elevation(dv, baro_port = 'Baro')
+dv <- downsample_data(dv, time_interval = 300)
+
+
+# gaps <- dv[, find_gaps(rbindlist(data)), by = list(name = paste(well, port))]
+# tmp  <- dv[, make_regular(rbindlist(data), gaps), by = list(name = paste(well, port))]
+# make_regular(dv, gaps)
+
+dv <- trim_downloads(dv, n_vals = c(3600, 7200))
+tmp <- dv[, rbindlist(data), by = list(well, port)]
+tmp[is.na(value), wl_elevation := NA_real_]
+
+tmp[, flag := 'Submerged']
+tmp[value <= baro *1.009, flag := 'In air']
+
+p1 <- ggplot(tmp[port != "Baro" & flag == 'Submerged'], 
+             aes(x = datetime, y = wl_elevation, group = port, color = port)) + 
+  ylab('Water level elevation (masl)') + 
+  scale_color_brewer('Port Elevation', type = 'qual', palette = 'Set1') + 
+  geom_line() + 
+  # scale_y_continuous(limits = c(316, 319.5)) + 
+  theme_bw()
+ggplotly(p1)
+
+p1 <- ggplot(tmp[port == "Baro"], 
+             aes(x = datetime, y = baro, group = port, color = port)) + 
+  ylab('Water level elevation (masl)') + 
+  scale_color_brewer('Port Elevation', type = 'qual', palette = 'Set1') + 
+  geom_line() + 
+  theme_bw()
+ggplotly(p1)
+
+
+# dv[grep('hbp-mps2-19 port 1_200303114700_X0311.DAT', file)]
+
+
+# 
+# 
+# 
+# 
+# y <- westbay_interpolate(y)
+
+
+
+
+```
+
+
+## Read RBR (rsk)
+
+```{r pressure, echo=FALSE}
+
+fn <- list.files('/media/jonathankennel/Seagate Expansion Drive/guelph_south', full.names = TRUE)
+fn <- fn[tools::file_ext(fn) == 'rsk']
+rbr  <- read_transducer(fn)
+rbr
+```
+
+
+## Read Micron (xlsx)
+
+```{r pressure, echo=FALSE}
+
+fn <- list.files('/media/jonathankennel/Seagate Expansion Drive/guelph_south', full.names = TRUE)
+fn <- fn[tools::file_ext(fn) == 'xlsx']
+mu <- read_transducer(fn)
+mu
+
+```
+

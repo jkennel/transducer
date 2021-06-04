@@ -49,6 +49,7 @@ read_rbr_db <- function(db, db_name, sql_text) {
     return(NULL)
   }
 
+
   # time is in milliseconds
   # read data into data.table and set key
   dt <- tryCatch(data.table::setDT(RSQLite::dbGetQuery(db, sql_text), key = 'tstamp'), error = function(e) e)
@@ -69,7 +70,13 @@ read_rbr_db <- function(db, db_name, sql_text) {
   }
 
 
+
+
+
+
   data.table::setnames(dt, 'tstamp', 'datetime')
+
+
   dt[, datetime := as.POSIXct(datetime/1000,
                               origin = '1970-01-01',
                               tz = 'UTC')]

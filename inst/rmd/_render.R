@@ -1,5 +1,5 @@
-rbr_files <- '/media/kennel/Seagate Expansion Drive/rbr_g360'
-rds_file <- '/media/kennel/Seagate Expansion Drive/rbr_g360meta'
+rbr_files <- '/media/jonathankennel/Seagate Expansion Drive/rbr_g360'
+rds_file <- '/media/jonathankennel/Seagate Expansion Drive/rbr_g360meta'
 
 
 quiet = "--quiet" %in% commandArgs(FALSE)
@@ -68,7 +68,7 @@ setwd(owd)
 
 
 file.copy(from = '_book',
-          to = '/media/kennel/Seagate Expansion Drive/rbr_g360_book',
+          to = '/media/jonathankennel/Seagate Expansion Drive/rbr_g360_book',
           recursive = TRUE,
           copy.date = TRUE)
 

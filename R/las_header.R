@@ -15,7 +15,7 @@ las_header <- function(dat, gravity = 9.80665, density = 0.9989) {
   strt   <- sprintf('%.1f', dat[1]$start)
   stop   <- sprintf('%.1f', dat[1]$end)
   fn     <- dat[1]$file_name
-  v      <- dat[1]$ruskin_version
+  v      <- dat[1]$version
   datet  <- as.character(Sys.Date())
 
   basic_header <-

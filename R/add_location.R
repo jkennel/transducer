@@ -1,23 +1,29 @@
-# -------------------------------------------------------------------------
+#===============================================================================
 # Location table must have
 #   file_name: the name of the file without the path
 #   elevation: the elevation of the transducer in (m)
-# -------------------------------------------------------------------------
+#===============================================================================
 #' add_location
 #'
 #' @param x data.table
 #' @param locations data.table with file_name, in_water, and elevation
 #'
+#' @importFrom Rcpp evalCpp
+#' @useDynLib transducer
+#'
 #' @return
 #' @export
 #'
 #' @examples
+#===============================================================================
 add_location <- function(x, locations, on_string = 'serial') {
 
   locations[x, on = on_string]
 
 }
 
+
+#===============================================================================
 #' to_pore_pressure
 #'
 #' @param x data.table
@@ -27,6 +33,7 @@ add_location <- function(x, locations, on_string = 'serial') {
 #' @export
 #'
 #' @examples
+#===============================================================================
 add_pore_pressure <- function(x, dbar_to_m = NULL) {
 
   x[, `:=` (data = lapply(data, to_pore_pressure,
@@ -40,6 +47,7 @@ add_pore_pressure <- function(x, dbar_to_m = NULL) {
 }
 
 
+#===============================================================================
 #' add_water_level
 #'
 #' If baro_serial is not provided this function will try to use a baro logger in
@@ -55,6 +63,7 @@ add_pore_pressure <- function(x, dbar_to_m = NULL) {
 #' @export
 #'
 #' @examples
+#===============================================================================
 add_water_level <- function(x, baro_serial = NULL, dbar_to_m = 1.019716, ...) {
 
 
@@ -94,6 +103,7 @@ add_water_level <- function(x, baro_serial = NULL, dbar_to_m = 1.019716, ...) {
 }
 
 
+#===============================================================================
 to_pore_pressure <- function(z, elevation, units, dbar_to_m = 1.019716) {
 
   z <- copy(z)
@@ -105,6 +115,8 @@ to_pore_pressure <- function(z, elevation, units, dbar_to_m = 1.019716) {
   return(z)
 }
 
+
+#===============================================================================
 to_water_level <- function(z,
                            well,
                            type,

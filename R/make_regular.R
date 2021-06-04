@@ -1,3 +1,4 @@
+#===============================================================================
 #' make_regular
 #'
 #' @param dat
@@ -6,6 +7,7 @@
 #' @export
 #'
 #' @examples
+#===============================================================================
 make_regular <- function(dat) {
 
   start <- min(sapply(dat$data, function(x) head(x, 1)$datetime), na.rm = TRUE)

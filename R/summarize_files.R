@@ -46,7 +46,6 @@ parse_paths <- function(folder_path, ...) {
 summarize_files <- function(file_names, output_folder = '') {
 
   fn <- file_names
-
  # fnn <- fn[1]
  # fnn <- fn[1]
  #    rbr <- rbindlist(lapply(fn, function(x) {
@@ -71,7 +70,8 @@ summarize_files <- function(file_names, output_folder = '') {
  #
  #    }))
   rbr <- rbindlist(lapply(fn, function(nm) {
-    rbr_sub <- read_rbr(nm)
+    print(nm)
+    rbr_sub <- read_transducer(nm)
 
     if(nrow(rbr_sub) >= 1){
 
@@ -90,7 +90,8 @@ summarize_files <- function(file_names, output_folder = '') {
       rbr_sub[, data := data_sub]
     }
 
-    out_name <- gsub('*.rsk', '', rbr_sub[1]$file_name)
+    out_name <- gsub('.rsk', '', basename(rbr_sub[1]$file))
+    print(paste0(output_folder, out_name, '.rds'))
     saveRDS(rbr_sub, paste0(output_folder, out_name, '.rds'))
     rbr_sub
 

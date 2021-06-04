@@ -4,16 +4,25 @@
 \alias{read_rbr.character}
 \title{read_rbr}
 \usage{
-\method{read_rbr}{character}(db_name, start = NULL, end = NULL, by = NULL, times = NULL)
+\method{read_rbr}{character}(
+  x,
+  start = NULL,
+  end = NULL,
+  by = NULL,
+  times = NULL,
+  transducer_depth = NULL,
+  well_elevation = NULL,
+  ...
+)
 }
 \arguments{
-\item{db_name}{character the path to the rbr database ( rsk )}
-
 \item{start}{starting date to get}
 
 \item{end}{ending date to get}
 
 \item{by}{spacing}
+
+\item{db_name}{character the path to the rbr database ( rsk )}
 
 \item{use_rbr_tz}{boolean use time zone information from the rbr file?}
 }

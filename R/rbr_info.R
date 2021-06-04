@@ -10,6 +10,7 @@
 #' @param db database connection
 #' @param db_name character the path to the rbr database ( rsk )
 #'
+#'
 #' @return list of results
 #'
 #' @export
@@ -90,9 +91,9 @@ rbr_info.SQLiteConnection <- function(db, db_name) {
                       calibration = list(data.table(key1 = NA_character_,
                                                     value = NA_real_)),
                       channel = NA_character_,
-                      type = NA_character_,
+                      parameter = NA_character_,
                       units = NA_character_,
-                      ruskin_version = NA_character_,
+                      version = NA_character_,
                       serial = NA_integer_,
                       model = NA_character_,
                       dt = NA_integer_))
@@ -173,12 +174,12 @@ rbr_info.SQLiteConnection <- function(db, db_name) {
   serial <- setDT(RSQLite::dbGetQuery(db, sql_text))
   serial[, file := db_name]
 
-  sql_text <- 'SELECT channelID AS id, shortName AS channel, longName AS type, units FROM channels'
+  sql_text <- 'SELECT channelID AS id, shortName AS channel, longName AS parameter, units FROM channels'
   channel <- setDT(RSQLite::dbGetQuery(db, sql_text))
   channel[, file := db_name]
-  channel[, ruskin_version := version]
+  channel[, version := version]
   channel[, channel := tolower(channel)]
-  channel[, type := tolower(type)]
+  channel[, parameter := tolower(parameter)]
 
 
   setkey(serial, file)
@@ -186,7 +187,7 @@ rbr_info.SQLiteConnection <- function(db, db_name) {
   setkey(coefficients, file, id)
   setkey(dt, file, id)
 
-  dt <- unique(dt[, list(file, dt)])
+  dt <- unique(dt[, list(file, dt = dt / 1000)])
   coefficients[channel][serial, on = 'file'][dt, on = 'file']
 
 }

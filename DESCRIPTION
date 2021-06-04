@@ -10,16 +10,20 @@ Maintainer: Jonathan Kennel <jkennel@uoguelph.ca>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: GPL-3
-Depends:
 Imports:
     data.table,
     RSQLite,
+    parallel,
     viridis,
     stringi,
     plotly,
+    readxl,
     DBI,
+    Rcpp,
     here,
-    glue
+    glue,
+    R6
+Linking: Rcpp
 Encoding: UTF-8
 LazyData: true
 Suggests:
@@ -27,4 +31,7 @@ Suggests:
     rmarkdown,
     DT
 VignetteBuilder: knitr
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
+LinkingTo: 
+    Rcpp,
+    RcppArmadillo

@@ -35,36 +35,68 @@ library(knitr)
 library(widgetframe)
 library(viridis)
 # params <- list()
-# params$rbr_files <- '/media/kennel/Seagate Expansion Drive/rbr_g360'
-# params$rds_file <- '/media/kennel/Seagate Expansion Drive/rbr_g360meta'
-# tmp <- summarize_files(params$rbr_files)
+# params$rbr_files <- '/media/jonathankennel/Seagate Expansion Drive/rbr_g360'
+# params$rds_file <- '/media/jonathankennel/Seagate Expansion Drive/rbr_g360meta'
+# fn_rbr <- parse_paths(params$rds_file,
+#                     full.names = TRUE,
+#                     pattern = '*.rds')
+# rbr_old <- rbindlist(lapply(fn_rbr, function(x) readRDS(x)[,list(file)]))
+# fn <- list.files(params$rbr_files, full.names = TRUE, pattern = '.rsk')
+# 
+# fn <- fn[!basename(fn) %in% basename(unique(rbr_old$file))]
+# 
+# fn_0 <- fn[file.size(fn) == 0]
+# fn <- fn[file.size(fn) != 0]
+# #fn[!basename(fn) %in% basename(list.files('/media/jonathankennel/Seagate Expansion Drive/rbr_g360meta/'))]
+# tmp <- summarize_files(fn, 
+#                        output_folder = '/media/jonathankennel/Seagate Expansion Drive/rbr_g360meta/')
 
 ```
 
 ```{r files, include=FALSE}
 
+
+
+
 if(!is.na(params$rds_file)) {
   fn_rbr <- parse_paths(params$rds_file,
                     full.names = TRUE,
                     pattern = '*.rds')
-  rbr_old <- rbindlist(lapply(fn_rbr, readRDS))
-  
+  # rbr_old <- rbindlist(lapply(fn_rbr, readRDS))
+  rbr_old <- rbindlist(lapply(fn_rbr, function(x) readRDS(x)[,list(file)]))
+
   #rbr_old <- readRDS(params$rds_file)
   
   fn <- parse_paths(params$rbr_files,
                     full.names = TRUE,
                     pattern = '*.rsk')
-  fn <- fn[!fn %in% unique(rbr_old$file)]
+  # fn <- fn[!fn %in% unique(rbr_old$file)]
+  fn <- fn[!basename(fn) %in% basename(unique(rbr_old$file))]
+
 } else {
   fn <- parse_paths(params$rbr_files, 
                     full.names = TRUE,
                     pattern = '*.rsk')
 }
 
+
+# 081079_20181024_1813.rsk
+
+
+# a <- setDT(file.info(fn))
+# a[, fn := fn]
+# 
+# a <- a[ctime > as.POSIXct('2020-10-20', tz = 'UTC')]
+# a <- a[!grepl('HBP5', fn)]
+# a <- a[!grepl('GSTW3', fn)]
+# a <- a[!grepl('GSMW2', fn)]
+# fn <- a$fn
+
+
 if(length(fn) > 0) {
   
   rbr_sum <- summarize_files(fn, 
-                             output_folder = '/media/kennel/Seagate Expansion Drive/rbr_g360meta/')
+                             output_folder = '/media/jonathankennel/Seagate Expansion Drive/rbr_g360meta/')
   
   
   # x <- "/media/kennel/Seagate Expansion Drive/rbr_g360/077923_20180815_1838.rsk"
@@ -93,24 +125,24 @@ if(length(fn) > 0) {
   rbr_sum[, max := vapply(data, function(x) max(x$max), FUN.VALUE=numeric(1))]
   rbr_sum[, min := vapply(data, function(x) min(x$min), FUN.VALUE=numeric(1))]
   
-  calibration <- rbr_sum[!is.na(type), (calibration[[1]]), 
-                         by = list(file_name, serial, 
+  calibration <- rbr_sum[, rbindlist(calibration), 
+                         by = list(basename(file), serial, 
                                    start_date = as.Date(start), 
-                                   end_date = as.Date(end), type)]
+                                   end_date = as.Date(end), parameter)]
   
-  # rbr_sum[, str(calibration[1]), list(file_name, type)]
+  # rbr_sum[, str(calibration[1]), list(file, type)]
   
-  if(!is.na(params$rds_file)) {
-    
-    rbr_old <- rbr_start_end(rbr_old)
-    
-    
-    rbr_old[, max := vapply(data, function(x) max(x$max), FUN.VALUE=numeric(1))]
-    rbr_old[, min := vapply(data, function(x) min(x$min), FUN.VALUE=numeric(1))]
-    
-  
-    rbr_sum <- rbind(rbr_old, rbr_sum)
-  } 
+  # if(!is.na(params$rds_file)) {
+  #   
+  #   rbr_old <- rbr_start_end(rbr_old)
+  #   
+  #   
+  #   rbr_old[, max := vapply(data, function(x) max(x$max), FUN.VALUE=numeric(1))]
+  #   rbr_old[, min := vapply(data, function(x) min(x$min), FUN.VALUE=numeric(1))]
+  #   
+  # 
+  #   rbr_sum <- rbind(rbr_old, rbr_sum)
+  # } 
 
   # saveRDS(rbr_sum, '/media/kennel/Seagate Expansion Drive/rbr_g360meta/rbr_sum.rds')
   
@@ -118,13 +150,14 @@ if(length(fn) > 0) {
   rbr_old <- rbr_start_end(rbr_old)
   rbr_old[, max := vapply(data, function(x) max(x$max), FUN.VALUE=numeric(1))]
   rbr_old[, min := vapply(data, function(x) min(x$min), FUN.VALUE=numeric(1))]
-  
+
   rbr_sum <- rbr_old
 
-  calibration <- rbr_sum[!is.na(type), (calibration[[1]]), 
-                         by = list(file_name, serial, 
-                                   start_date = as.Date(start), 
+  calibration <- rbr_sum[!is.na(type), (calibration[[1]]),
+                         by = list(file, serial,
+                                   start_date = as.Date(start),
                                    end_date = as.Date(end), type)]
+  
 }
 
 set.seed(123)
@@ -132,7 +165,7 @@ set.seed(123)
 rows_picked <- 1:nrow(rbr_sum) #sample(nrow(rbr_sum), size = 500, replace = FALSE)
 fns <- rbr_sum[rows_picked]$file
 rbr_sum <- rbr_sum[file %in% fns]
-setkey(rbr_sum, file_name)
+setkey(rbr_sum, file)
 
 wh <- is.na(sapply(rbr_sum$data, function(x) x$datetime))
 
@@ -141,27 +174,27 @@ rbr_table <- rbr_sum[!wh, list(serial,
                                start_date = as.Date(start),
                                end_date = as.Date(end),
                                dt = dt,
-                               n, 
+                               # n, 
                                # type,
                                units,
                                # min = round(min, 3),
                                # max = round(max, 3),
                                model,
-                               ruskin = ruskin_version,
-                               file_name)]
+                               ruskin = version,
+                               file = basename(file))]
 
 rbr_missing <- rbr_sum[wh, list(serial,
-                                start_date = as.Date(start),
-                                end_date = as.Date(end),
-                                dt = dt,
-                                n, 
-                                # type,
-                                units,
-                                # min = round(min, 3),
-                                # max = round(max, 3),
-                                model,
-                                ruskin = ruskin_version,
-                                file_name)]
+                               start_date = as.Date(start),
+                               end_date = as.Date(end),
+                               dt = dt,
+                               # n, 
+                               # type,
+                               units,
+                               # min = round(min, 3),
+                               # max = round(max, 3),
+                               model,
+                               ruskin = version,
+                               file = basename(file))]
 
 ```
 
@@ -177,7 +210,7 @@ RBR folder: `r params$rbr_files`
 
 ```{r }
 
-coverage <- unique(rbr_table[, list(file_name, start_date, end_date)])
+coverage <- unique(rbr_table[, list(file=basename(file), start_date, end_date)])
 coverage <- coverage[start_date > as.Date('2012-01-01')]
 start <- min(coverage$start_date, na.rm = TRUE)
 end   <- max(coverage$end_date, na.rm = TRUE)
@@ -200,7 +233,7 @@ ax <- list(
 
 fig <- plot_ly(z = mat,
                x = dates,
-               y = coverage$file_name,
+               y = coverage$file,
                colors = viridis(4)[1:2],
                type = "heatmap", height = 700) %>%
   hide_colorbar() %>% layout(yaxis = ax)
@@ -236,15 +269,15 @@ DT::datatable(rbr_missing, rownames = FALSE, filter = 'top')%>%
 ```{r rbrplot, echo = FALSE, results = 'asis', warning=FALSE}
 
 rbr_sum <- rbr_sum[!wh]
-fn <- unique(rbr_sum$file_name)
+fn <- unique(rbr_sum$file)
 # fn <- fn[1:10]
 for (i in seq_along(fn)) {
   p <- list()
   
-  rbr_sub <- rbr_sum[file_name == fn[i]]
-  # calibration_sub <- calibration[file_name == fn[i]]
+  rbr_sub <- rbr_sum[file == fn[i]]
+  # calibration_sub <- calibration[file == fn[i]]
   
-  cat(paste0('## ', fn[i], ' {-}\n'))
+  cat(paste0('## ', basename(fn[i]), ' {-}\n'))
   
   n <- nrow(rbr_sub)
   for (j in 1:n) {

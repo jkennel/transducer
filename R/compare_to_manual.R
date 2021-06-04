@@ -1,3 +1,4 @@
+#===============================================================================
 #' compare_manual
 #' This is for when all non-barometric transducers should read the same depth adjusted value
 #'
@@ -9,6 +10,7 @@
 #' @export
 #'
 #' @examples
+#===============================================================================
 compare_manual <- function(location,
                            manual_wl,
                            stat_fun = median) {
@@ -29,6 +31,7 @@ compare_manual <- function(location,
 }
 
 
+#===============================================================================
 #' compare_air
 #' This is for when all transducers should read the same value
 #'
@@ -40,6 +43,7 @@ compare_manual <- function(location,
 #' @export
 #'
 #' @examples
+#===============================================================================
 compare_air <- function(location, manual_wl, stat_fun = median) {
 
   man_wl <- location[manual_wl, on = 'well']
@@ -50,6 +54,7 @@ compare_air <- function(location, manual_wl, stat_fun = median) {
 }
 
 
+#===============================================================================
 #' estimate_air
 #'
 #' @param locations
@@ -60,6 +65,7 @@ compare_air <- function(location, manual_wl, stat_fun = median) {
 #' @export
 #'
 #' @examples
+#===============================================================================
 estimate_air <- function(locations, start, end, stat_fun = median) {
 
   r <- read_rbr(locations$file, start, end)
@@ -72,6 +78,7 @@ estimate_air <- function(locations, start, end, stat_fun = median) {
 }
 
 
+#===============================================================================
 #' estimate_wl
 #'
 #' @param locations
@@ -82,6 +89,7 @@ estimate_air <- function(locations, start, end, stat_fun = median) {
 #' @export
 #'
 #' @examples
+#===============================================================================
 estimate_wl <- function(x, start, end, stat_fun = median) {
 
   #r <- read_rbr(locations, start, end)
@@ -101,6 +109,8 @@ estimate_wl <- function(x, start, end, stat_fun = median) {
 
 }
 
+
+#===============================================================================
 #' adjust_value
 #'
 #' @param x
@@ -110,6 +120,7 @@ estimate_wl <- function(x, start, end, stat_fun = median) {
 #' @export
 #'
 #' @examples
+#===============================================================================
 adjust_value <- function(x, shift) {
 
   x[shift, shift := i.shift, on = c('file', 'well')]
@@ -120,7 +131,7 @@ adjust_value <- function(x, shift) {
 }
 
 
-
+#===============================================================================
 adj_wl <- function(z, adjust) {
 
   z <- copy(z)
