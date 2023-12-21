@@ -66,8 +66,9 @@ read_diver.ascii <- function(x,
                              ...) {
 
 
-  h       <- readLines(x, 100)
-  h       <- gsub("\t", " ", h)  # replace tabs with spaces
+  h <- readLines(x, 100)
+  h <- iconv(h, "UTF-8", "UTF-8",sub='')
+  h <- gsub("\t", " ", h)  # replace tabs with spaces
 
 
   if(trimws(h[1]) != 'Data file for DataLogger.'){
@@ -75,8 +76,8 @@ read_diver.ascii <- function(x,
     return(NULL)
   }
 
-  h       <- gsub('\xb0', '', h)
-  h       <- gsub('\xba', '', h)
+  # h       <- gsub('\xb0', '', h)
+  # h       <- gsub('\xba', '', h)
   h       <- tolower(h)
   h       <- gsub('instrument info from data header', 'series settings', h)
   h       <- gsub('instrument info', 'logger settings', h)
