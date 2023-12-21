@@ -20,9 +20,6 @@ micron_calibration(
 
 \item{robust}{use MASS::rlm method instead of lm}
 }
-\value{
-
-}
 \description{
 micron_calibration
 }

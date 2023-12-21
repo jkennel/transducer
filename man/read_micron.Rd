@@ -19,9 +19,6 @@ read_micron(
 
 \item{...}{}
 }
-\value{
-
-}
 \description{
 read_micron
 }

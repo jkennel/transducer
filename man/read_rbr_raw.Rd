@@ -11,9 +11,6 @@ read_rbr_raw(x, type = c("raw", "basic", "compensated"))
 
 \item{type}{(character vector) one or more of 'raw', 'basic', or 'compensated'}
 }
-\value{
-
-}
 \description{
 read_rbr_raw
 }

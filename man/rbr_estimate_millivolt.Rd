@@ -9,9 +9,6 @@ rbr_estimate_millivolt(rbr)
 \arguments{
 \item{rbr}{}
 }
-\value{
-
-}
 \description{
 Remove the calibration parameters from the rbr to get raw readings
 }

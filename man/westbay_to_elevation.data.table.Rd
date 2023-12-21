@@ -9,9 +9,6 @@
 \arguments{
 \item{baro_port}{}
 }
-\value{
-
-}
 \description{
 westbay_to_elevation
 }

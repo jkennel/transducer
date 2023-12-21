@@ -9,9 +9,6 @@ switch_reader(z, ...)
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 switch_reader
 }

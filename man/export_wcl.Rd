@@ -9,9 +9,6 @@ export_wcl(fn, by = NULL, gravity = 9.80665, density = 0.9989)
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 Title
 }

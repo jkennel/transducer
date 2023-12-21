@@ -9,9 +9,6 @@ westbay_make_regular(x, max_difference = NULL, ...)
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 westbay_make_regular
 }

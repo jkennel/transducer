@@ -9,9 +9,6 @@ fill_gaps(x)
 \arguments{
 \item{x}{}
 }
-\value{
-
-}
 \description{
 fill_gaps
 }

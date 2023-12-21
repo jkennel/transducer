@@ -11,9 +11,6 @@ read_westbay(x, transducer_depth = NULL, well_elevation = NULL, ...)
 
 \item{...}{}
 }
-\value{
-
-}
 \description{
 read_westbay
 }

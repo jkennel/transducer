@@ -11,9 +11,6 @@ vertigraph(x, ...)
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 vertigraph
 

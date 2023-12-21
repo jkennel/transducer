@@ -9,9 +9,6 @@
 \arguments{
 \item{x}{}
 }
-\value{
-
-}
 \description{
 .parse_westbay_header
 }

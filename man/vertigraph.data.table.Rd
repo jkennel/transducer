@@ -11,9 +11,6 @@ Creates a vertical profile}
 \arguments{
 \item{plot}{}
 }
-\value{
-
-}
 \description{
 
 }

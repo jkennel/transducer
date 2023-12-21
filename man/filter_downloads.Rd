@@ -9,9 +9,6 @@ filter_downloads(x, cutoff = 1050)
 \arguments{
 \item{cutoff}{}
 }
-\value{
-
-}
 \description{
 filter_downloads
 }

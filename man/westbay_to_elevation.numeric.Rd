@@ -9,9 +9,6 @@
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 westbay_to_elevation
 }

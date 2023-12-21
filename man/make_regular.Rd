@@ -9,9 +9,6 @@ make_regular(dat)
 \arguments{
 \item{dat}{}
 }
-\value{
-
-}
 \description{
 make_regular
 }

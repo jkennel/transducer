@@ -9,9 +9,6 @@ read_levelogger(x, transducer_depth = NULL, well_elevation = NULL, ...)
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 read_levelogger
 }

@@ -9,9 +9,6 @@ rbr_times(ev_tstamp, ev_index, ti)
 \arguments{
 \item{ti}{}
 }
-\value{
-
-}
 \description{
 rbr_times
 }

@@ -9,9 +9,6 @@ rbr_temperature_correction(pressure, temperature, x)
 \arguments{
 \item{x}{calibration constants}
 }
-\value{
-
-}
 \description{
 rbr_temperature_correction
 }

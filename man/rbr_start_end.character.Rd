@@ -10,9 +10,6 @@ start and end times for rsk data table}
 \arguments{
 \item{x}{}
 }
-\value{
-
-}
 \description{
 rbr_start_end
 start and end times for rsk data table

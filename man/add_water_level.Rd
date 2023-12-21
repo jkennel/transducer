@@ -9,9 +9,6 @@ add_water_level(x, baro_serial = NULL, dbar_to_m = 1.019716, ...)
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 If baro_serial is not provided this function will try to use a baro logger in
 the provided dataset.

@@ -9,9 +9,6 @@ combine_files(x)
 \arguments{
 \item{x}{}
 }
-\value{
-
-}
 \description{
 combine_files
 }

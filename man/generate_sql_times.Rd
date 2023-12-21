@@ -9,9 +9,6 @@ generate_sql_times(start = NULL, end = NULL, by = NULL, times = NULL)
 \arguments{
 \item{times}{}
 }
-\value{
-
-}
 \description{
 generate_sql_times
 }

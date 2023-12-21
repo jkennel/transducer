@@ -11,9 +11,6 @@ adjust_time(x, n_sec = 0)
 
 \item{n_sec}{number of seconds to adjust}
 }
-\value{
-
-}
 \description{
 adjust_time
 }

@@ -9,9 +9,6 @@ write_rsk_summary(fn)
 \arguments{
 \item{fn}{}
 }
-\value{
-
-}
 \description{
 write_rsk_summary
 }

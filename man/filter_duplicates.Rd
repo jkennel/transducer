@@ -13,9 +13,6 @@ filter_duplicates(x, fun = data.table::first, ...)
 
 \item{...}{arguments to pass to fun}
 }
-\value{
-
-}
 \description{
 filter_duplicates
 }

@@ -9,9 +9,6 @@ density_temperature(x)
 \arguments{
 \item{x}{temperature}
 }
-\value{
-
-}
 \description{
 density_temperature
 }

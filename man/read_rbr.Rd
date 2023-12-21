@@ -9,9 +9,6 @@ read_rbr(x, ...)
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 read_rbr
 }

@@ -9,9 +9,6 @@ rbr_raw_to_temperature(x, calib)
 \arguments{
 \item{calib}{}
 }
-\value{
-
-}
 \description{
 rbr_raw_to_temperature
 }

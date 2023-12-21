@@ -9,9 +9,6 @@ trim_downloads(x, n_vals = c(5, 5))
 \arguments{
 \item{n_vals}{}
 }
-\value{
-
-}
 \description{
 trim_downloads
 }

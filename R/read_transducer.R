@@ -7,16 +7,14 @@
 #' @export
 #'
 #' @examples
-read_transducer <- function(x, n_cores = 1, ...) {
+read_transducer <- function(x, ...) {
 
 
   # check for valid input
   .check_files(x)
 
-  cl <- parallel::makePSOCKcluster(n_cores)
-  on.exit(parallel::stopCluster(cl))
 
-  dat <- rbindlist(parallel::parLapply(cl, x, switch_reader, ...))
+  dat <- rbindlist(lapply(x, switch_reader, ...))
 
   dat
 

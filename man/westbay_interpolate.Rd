@@ -9,9 +9,6 @@ westbay_interpolate(x)
 \arguments{
 \item{x}{}
 }
-\value{
-
-}
 \description{
 westbay_interpolate
 }

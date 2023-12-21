@@ -11,9 +11,6 @@ create a hydrograph}
 \arguments{
 \item{plot}{}
 }
-\value{
-
-}
 \description{
 
 }

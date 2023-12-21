@@ -9,9 +9,6 @@ write_vbs(fn_vbs, fn_las, fn_wcl, fn_ini, fn_wdt = NA)
 \arguments{
 \item{fn_wdt}{}
 }
-\value{
-
-}
 \description{
 write_vbs
 }

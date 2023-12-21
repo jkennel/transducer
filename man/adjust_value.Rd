@@ -9,9 +9,6 @@ adjust_value(x, shift)
 \arguments{
 \item{shift}{}
 }
-\value{
-
-}
 \description{
 adjust_value
 }

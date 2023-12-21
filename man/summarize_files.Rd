@@ -11,9 +11,6 @@ summarize_files(file_names, output_folder = "")
 
 \item{output_folder}{the folder to export files to}
 }
-\value{
-
-}
 \description{
 This function reads in a folder of rbr files and generates a summary
 }

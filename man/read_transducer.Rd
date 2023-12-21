@@ -4,13 +4,10 @@
 \alias{read_transducer}
 \title{read_transducer}
 \usage{
-read_transducer(x, n_cores = 1, ...)
+read_transducer(x, ...)
 }
 \arguments{
 \item{...}{}
-}
-\value{
-
 }
 \description{
 read_transducer

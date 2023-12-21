@@ -9,9 +9,6 @@ rbr_start_end(x, ...)
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 rbr_start_end
 }

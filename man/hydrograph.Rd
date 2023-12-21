@@ -11,9 +11,6 @@ hydrograph(x, ...)
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 hydrograph
 

@@ -11,9 +11,6 @@ gravity(elevation = 0, latitude = 0)
 
 \item{latitude}{the latitude for the monitoring location in degrees}
 }
-\value{
-
-}
 \description{
 gravity
 }

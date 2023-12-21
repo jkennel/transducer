@@ -1,7 +1,7 @@
 Package: transducer
 Type: Package
 Title: Reads RBR files
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: c(person("Jonathan", "Kennel", email = "jkennel@uoguelph.ca", role = c("aut", "cre", "trl")), 
              person("Sam", "Jacobson", email = "sam.jacobson@g360group.org", role = c("ctb")),
              person("Kathleen", "Johnson", email = "kathleen.johnson@g360group.org", role = c("ctb")),
@@ -13,7 +13,6 @@ License: GPL-3
 Imports:
     data.table,
     RSQLite,
-    parallel,
     viridis,
     stringi,
     plotly,
@@ -31,7 +30,7 @@ Suggests:
     rmarkdown,
     DT
 VignetteBuilder: knitr
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
 LinkingTo: 
     Rcpp,
     RcppArmadillo

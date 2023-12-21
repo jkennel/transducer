@@ -11,9 +11,6 @@
 
 \item{...}{}
 }
-\value{
-
-}
 \description{
 read_westbay.character
 }

@@ -9,9 +9,6 @@ write_las(dat, fn_las, gravity = 9.80665, density = 0.9989)
 \arguments{
 \item{fn_las}{}
 }
-\value{
-
-}
 \description{
 write_las
 }

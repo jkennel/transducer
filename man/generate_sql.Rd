@@ -23,7 +23,4 @@ generate_sql(Sys.time()-1000, Sys.time(), 10)
 
 generate_sql
 
-
-
-
 }

@@ -9,9 +9,6 @@ make_even_times(x, diff_time, ...)
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 make_even_times
 }

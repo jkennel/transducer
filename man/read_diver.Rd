@@ -11,9 +11,6 @@ read_diver(x, ...)
 
 \item{...}{}
 }
-\value{
-
-}
 \description{
 import diver data to R
 }

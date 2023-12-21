@@ -10,9 +10,6 @@ compare_manual(location, manual_wl, stat_fun = median)
 \arguments{
 \item{stat_fun}{}
 }
-\value{
-
-}
 \description{
 compare_manual
 This is for when all non-barometric transducers should read the same depth adjusted value

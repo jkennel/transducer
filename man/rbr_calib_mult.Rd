@@ -9,9 +9,6 @@ rbr_calib_mult(x, calib, is_temp)
 \arguments{
 \item{is_temp}{}
 }
-\value{
-
-}
 \description{
 rbr_calib_mult
 }
