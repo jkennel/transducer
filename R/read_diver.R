@@ -67,7 +67,7 @@ read_diver.ascii <- function(x,
 
 
   h <- readLines(x, 100)
-  h <- iconv(h, "UTF-8", "UTF-8",sub='')
+  h <- iconv(h, "UTF-8", "UTF-8", sub='')
   h <- gsub("\t", " ", h)  # replace tabs with spaces
 
 
@@ -251,8 +251,11 @@ read_diver.binary <- function(x, head_size = 280, ...) {
   rng2   <- as.numeric(trimws(rawToChar(x[179:186])))
 
 
-  units1 <- trimws(rawToChar(x[88:95]))
-  units2 <- trimws(rawToChar(x[173:178]))
+  units1 <- (rawToChar(x[88:95]))
+  units1 <- trimws(iconv(units1, "UTF-8", "UTF-8", sub=''))
+
+  units2 <- (rawToChar(x[173:178]))
+  units2 <- trimws(iconv(units2, "UTF-8", "UTF-8", sub=''))
 
 
   dt     <- as.numeric(strptime(paste('1970-01-01', trimws(rawToChar(x[230:238]))),
